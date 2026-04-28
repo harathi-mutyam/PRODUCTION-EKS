@@ -11,25 +11,27 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; `
 [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
 iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
-Verify installation:
+**Verify installation:**
 
 choco -v
-☁️ 2. Install AWS CLI using Chocolatey
+
+**2. Install AWS CLI using Chocolatey**
 
 Install AWS CLI:
 
 choco install awscli -y
 
-Verify:
+**Verify:**
 
 aws --version
-🏗️ 3. Install Terraform using Chocolatey
 
-Install Terraform:
+**3. Install Terraform using Chocolatey**
+
+**Install Terraform:**
 
 choco install terraform -y
 
-Verify:
+**Verify:**
 
 terraform -version
 
