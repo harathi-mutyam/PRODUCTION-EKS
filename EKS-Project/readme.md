@@ -107,6 +107,10 @@ terraform version
 
 terraform init
 
+**validate the terraform code
+**
+terraform validate
+
 **7. Plan the Infrastructure**
 
 terraform plan -var-file="dev.tfvars"
