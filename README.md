@@ -81,6 +81,32 @@ Also removed the duplicate TLS certificate data source in iam.tf to keep a singl
 This ensures the OIDC configuration is defined only once in iam.tf, avoiding conflicts and duplication.
 
 
+**YOU must create a keypair before terraform apply**
+
+Step 1: Create SSH key locally
+
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/ec2_keypair
+
+This creates:
+
+~/.ssh/ec2_keypair
+
+~/.ssh/ec2_keypair.pub
+
+**Step 2: Import into AWS (VERY IMPORTANT)**
+
+aws ec2 import-key-pair \
+  --key-name ec2_keypair \
+  --public-key-material fileb://~/.ssh/ec2_keypair.pub \
+  --region us-east-1
+
+Now AWS knows your key.
+
+**Step 3: Verify it exists**
+
+aws ec2 describe-key-pairs --key-names ec2_keypair
+
+
 
 
 
