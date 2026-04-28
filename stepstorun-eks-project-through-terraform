@@ -74,21 +74,79 @@ terraform apply -var-file="dev.tfvars"
 Type:
 
 yes
-☸️ 10. Configure Kubernetes access (IMPORTANT)
 
-Because your config has:
+Post Deployment (Bastion Host Access)
 
-endpoint_public_access = false
+Because cluster is private:
 
-👉 Your EKS cluster is PRIVATE
-
-So you must:
-
-Step 1: SSH into bastion EC2
+SSH into Bastion
 ssh -i ~/.ssh/ec2_keypair ubuntu@<bastion-public-ip>
-Step 2: Configure kubeconfig inside bastion
-aws eks update-kubeconfig \
-  --region us-east-1 \
-  --name eks-demo
-Step 3: Test cluster
+Configure Kubernetes access
+aws configure
+aws eks update-kubeconfig --region us-east-1 --name eks-demo
+
+Verify:
+
 kubectl get nodes
+📦 13. Install Helm (inside bastion)
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+⚖️ 14. Install AWS Load Balancer Controller
+helm repo add eks https://aws.github.io/eks-charts
+helm repo update
+
+Install:
+
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=eks-demo \
+  --set region=us-east-1 \
+  --set vpcId=<vpc-id> \
+  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=<IAM-role>
+
+Verify:
+
+kubectl get deployment -n kube-system
+🚀 15. Deploy Microservices
+kubectl apply -f ns.yaml
+kubectl apply -f product.yaml
+kubectl apply -f cart.yaml
+kubectl apply -f payments.yaml
+🌐 16. Ingress Deployment (HTTP ALB)
+kubectl apply -f ingress.yaml
+
+👉 ALB will be automatically created.
+
+🔐 17. Enable TLS (HTTPS Setup)
+Step 1: Create Route53 Hosted Zone
+example.com
+Step 2: Create ACM Certificate
+
+Request certificate for:
+
+cart.example.com
+product.example.com
+payments.example.com
+Step 3: Update Ingress
+
+Add:
+
+alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
+alb.ingress.kubernetes.io/certificate-arn: <cert-arn>
+alb.ingress.kubernetes.io/ssl-redirect: '443'
+
+Apply:
+
+kubectl apply -f ingress.yaml
+🌍 18. Host-Based Routing (Production)
+Domain	Service
+cart.example.com	Cart
+product.example.com	Product
+payments.example.com	Payments
+🧹 19. Destroy Infrastructure (Cleanup)
+terraform destroy -var-file="dev.tfvars"
+
+
+
+
