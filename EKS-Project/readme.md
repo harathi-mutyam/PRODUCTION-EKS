@@ -69,6 +69,17 @@ Used for:
 - Helm installation
 - Controller installation
 
+Always run Terraform commands from the folder where main.tf exists
+cd eks-project/terraform/eks
+terraform version
+terraform init
+#######Plan Infrastructure
+terraform plan -var-file="dev.tfvars"
+
+####Apply Changes
+terraform apply -var-file="dev.tfvars"
+
+
 ## Post-Provisioning Setup (Inside Bastion Host)
 After Terraform completes:
 
