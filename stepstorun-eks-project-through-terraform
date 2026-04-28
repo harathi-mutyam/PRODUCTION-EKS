@@ -1,0 +1,94 @@
+EKS Project Run Steps (Terraform)
+📁 1. Clone the repository
+git clone https://github.com/harathi-mutyam/PRODUCTION-EKS.git
+cd PRODUCTION-EKS
+📂 2. Go to Terraform working directory
+
+Based on your instructions:
+
+cd eks-project/terraform/eks
+
+👉 Make sure this folder contains:
+
+main.tf
+eks.tf
+vpc.tf
+provider.tf
+dev.tfvars
+☁️ 3. Configure AWS CLI (mandatory)
+aws configure
+
+Set:
+
+AWS Access Key
+Secret Key
+Region → us-east-1
+🪣 4. Create S3 backend bucket (if not already created)
+
+If your backend.tf uses S3:
+
+aws s3 mb s3://your-terraform-state-bucket --region us-east-1
+
+👉 Also ensure DynamoDB table exists if state locking is used.
+
+🔑 5. Create EC2 Key Pair (VERY IMPORTANT)
+
+Your project uses:
+
+data "aws_key_pair"
+
+So key MUST already exist in AWS.
+
+Step 1: Create local key
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/ec2_keypair
+Step 2: Import into AWS
+aws ec2 import-key-pair \
+  --key-name ec2_keypair \
+  --public-key-material fileb://~/.ssh/ec2_keypair.pub \
+  --region us-east-1
+Step 3: Verify
+aws ec2 describe-key-pairs --key-names ec2_keypair
+⚙️ 6. Initialize Terraform
+terraform init
+
+👉 This will:
+
+download AWS provider
+initialize backend (S3)
+prepare modules
+🔍 7. Validate configuration
+terraform validate
+📊 8. Plan infrastructure
+terraform plan -var-file="dev.tfvars"
+
+Check carefully:
+
+VPC creation
+EKS cluster
+Node groups
+EC2 bastion
+IAM roles
+🚀 9. Apply infrastructure
+terraform apply -var-file="dev.tfvars"
+
+Type:
+
+yes
+☸️ 10. Configure Kubernetes access (IMPORTANT)
+
+Because your config has:
+
+endpoint_public_access = false
+
+👉 Your EKS cluster is PRIVATE
+
+So you must:
+
+Step 1: SSH into bastion EC2
+ssh -i ~/.ssh/ec2_keypair ubuntu@<bastion-public-ip>
+Step 2: Configure kubeconfig inside bastion
+aws eks update-kubeconfig \
+  --region us-east-1 \
+  --name eks-demo
+Step 3: Test cluster
+kubectl get nodes
