@@ -82,12 +82,15 @@ This ensures the OIDC configuration is defined only once in iam.tf, avoiding con
 
 If you use a data block for aws_key_pair, you must first create the key pair in your AWS account before running Terraform.
 
+
 data "aws_key_pair" "key_pair" {
   key_name = var.key_name
 }
 
 
+
 If you use a resource block, you should first generate the SSH key locally, and then Terraform will create the AWS key pair for you automatically.
+
 
 
 /*resource "aws_key_pair" "key_pair" {
