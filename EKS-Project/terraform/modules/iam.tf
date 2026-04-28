@@ -16,9 +16,9 @@ resource "random_integer" "randoem_suffix" {
   
 }
 
-data "tls_certificate" "eks-certificate" {
+/*data "tls_certificate" "eks-certificate" {
   url = aws_eks_cluster.eks[0].identity[0].oidc[0].issuer
-}
+}*/
 
 resource "aws_iam_role" "eks_cluster_role" {
     count = var.create_eks_cluster_role ? 1 : 0
