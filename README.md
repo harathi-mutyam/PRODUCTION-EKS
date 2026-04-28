@@ -20,6 +20,8 @@ git clone https://github.com/harathi-mutyam/PRODUCTION-EKS.git
 
 create a iam user in your aws account , create accesskeys
 
+in git bash
+
 aws configure
 
 Set:
