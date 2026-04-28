@@ -48,9 +48,6 @@ terraform validate
 
 terraform plan -var-file="dev.tfvars"
 
-**8. Apply the Changes**
-
-terraform apply -var-file="dev.tfvars"
 
 **changes were made on 28/4/2026**
 
@@ -106,6 +103,10 @@ Now AWS knows your key.
 
 aws ec2 describe-key-pairs --key-names ec2_keypair
 
+
+**8. Apply the Changes**
+
+terraform apply -var-file="dev.tfvars"
 
 
 
