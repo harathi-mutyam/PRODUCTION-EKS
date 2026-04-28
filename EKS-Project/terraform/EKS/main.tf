@@ -21,23 +21,23 @@ module "eks" {
   public_subnet_name        = "${local.env}-${var.public_subnet_name}"
   private_subnet_count      = var.private_subnet_count
   private_subnet_cidr_block = var.private_subnet_cidr_block
-  private_subnet_name      = "${local.env}-${var.private_subnet_name}"
-  public_route_table_name  = "${local.env}-${var.public_route_table_name}"
-  private_route_table_name = "${local.env}-${var.private_route_table_name}"
-  eip_name                 = "${local.env}-${var.eip_name}"
-  nat_gateway_name         = "${local.env}-${var.nat_gateway_name}"
-  eks-sg                   = var.eks-sg
+  private_subnet_name       = "${local.env}-${var.private_subnet_name}"
+  public_route_table_name   = "${local.env}-${var.public_route_table_name}"
+  private_route_table_name  = "${local.env}-${var.private_route_table_name}"
+  eip_name                  = "${local.env}-${var.eip_name}"
+  nat_gateway_name          = "${local.env}-${var.nat_gateway_name}"
+  eks-sg                    = var.eks-sg
 
   create_eks_cluster_role   = true
   create_eks_nodegroup_role = true
   instance_types            = var.instance_types
-  desired_capacity = var.desired_capacity
-  min_capacity     = var.min_capacity
-  max_capacity     = var.max_capacity
-  create_eks_cluster      = var.create_eks_cluster
-  kubernetes_version      = var.kubernetes_version
-  endpoint_private_access = var.endpoint_private_access
-  endpoint_public_access  = var.endpoint_public_access
+  desired_capacity          = var.desired_capacity
+  min_capacity              = var.min_capacity
+  max_capacity              = var.max_capacity
+  create_eks_cluster        = var.create_eks_cluster
+  kubernetes_version        = var.kubernetes_version
+  endpoint_private_access   = var.endpoint_private_access
+  endpoint_public_access    = var.endpoint_public_access
 
   addons = var.addons
 }

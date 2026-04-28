@@ -48,9 +48,9 @@ addons = [
     version = "v1.33.0-eksbuild.2"
   },
   {
-      name    = "metrics-server"
-      # Replace with the specific version for your K8s version
-      version = "v0.7.2-eksbuild.1" 
+    name = "metrics-server"
+    # Replace with the specific version for your K8s version
+    version = "v0.7.2-eksbuild.1"
   }
   # {
   #   name    = "aws-ebs-csi-driver"
