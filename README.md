@@ -78,7 +78,22 @@ Also removed the duplicate TLS certificate data source in iam.tf to keep a singl
 This ensures the OIDC configuration is defined only once in iam.tf, avoiding conflicts and duplication.
 
 
-**YOU must create a keypair before terraform apply**
+**YOU must create a keypair before terraform apply** 
+
+If you use a data block for aws_key_pair, you must first create the key pair in your AWS account before running Terraform.
+
+If you use a resource block, you should first generate the SSH key locally, and then Terraform will create the AWS key pair for you automatically.
+
+data "aws_key_pair" "key_pair" {
+  key_name = var.key_name
+}
+
+/*resource "aws_key_pair" "key_pair" {
+  key_name   = var.key_name
+  public_key = file("~/.ssh/id_rsa.pub")
+}*/
+
+
 
 Step 1: Create SSH key locally
 
