@@ -70,9 +70,13 @@ Used for:
 - Controller installation
 
 Always run Terraform commands from the folder where main.tf exists
+
 cd eks-project/terraform/eks
+
 terraform version
+
 terraform init
+
 #######Plan Infrastructure
 terraform plan -var-file="dev.tfvars"
 
