@@ -107,8 +107,8 @@ terraform version
 
 terraform init
 
-**validate the terraform code
-**
+**validate the terraform code**
+
 terraform validate
 
 **7. Plan the Infrastructure**
