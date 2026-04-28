@@ -36,9 +36,11 @@ cd eks-project/terraform/eks
 
 terraform version
 
-**6. Initialize Terraform**
+**6. Initialize Terraform and validate it**
 
 terraform init
+
+terraform validate
 
 **7. Plan the Infrastructure**
 
