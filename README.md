@@ -26,6 +26,8 @@ region = "us-east-1"
 
 Ensure the region in backend.tf matches the region where your Terraform state storage (for example, an S3 bucket) is hosted.
 
+create a s3 bucket in aws account
+
 **4. Navigate to the Terraform Directory**
 
 Always run Terraform commands from the folder where main.tf exists:
