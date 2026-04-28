@@ -185,7 +185,7 @@ aws ec2 describe-key-pairs --key-names ec2_keypair
 
 terraform apply -var-file="dev.tfvars"
 
-
+further steps follow stepstorun-eks-project-through-terraform notes
 
 
 
