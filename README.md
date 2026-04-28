@@ -16,6 +16,22 @@ git clone https://github.com/harathi-mutyam/PRODUCTION-EKS.git
 
 **3. After Cloning the Repository**
 
+**Configure AWS CLI**
+
+create a iam user in your aws account , create accesskeys
+
+aws configure
+
+Set:
+
+AWS Access Key
+
+Secret Key
+
+Region → us-east-1
+
+
+
 Make the following changes:
 
 Update the region in dev.tfvars based on the location where you want to create your infrastructure (such as EKS, VPC, etc.).
