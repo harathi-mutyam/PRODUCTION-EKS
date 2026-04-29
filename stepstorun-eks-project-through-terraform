@@ -174,5 +174,5 @@ cart.example.com	Cart
 product.example.com	Product
 payments.example.com	Payments
 
-19. Destroy Infrastructure (Cleanup)
+16. Destroy Infrastructure (Cleanup)
 terraform destroy -var-file="dev.tfvars"
