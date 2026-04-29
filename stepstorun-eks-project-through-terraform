@@ -117,11 +117,44 @@ kubectl apply -f payments.yaml
 16. Ingress Deployment (HTTP ALB)
 kubectl apply -f ingress.yaml
 
-ALB will be automatically created.
+kubectl get ingress
+
+You will see:
+
+ALB DNS name → k8s-default-xxxx.elb.amazonaws.com
+
+Test in browser:
+
+http://<ALB-DNS>
 
  17. Enable TLS (HTTPS Setup)
 Step 1: Create Route53 Hosted Zone
 example.com
+
+
+Go to AWS Console:
+
+Create Hosted Zone
+Domain: example.com
+
+This gives:
+
+NS records
+Hosted zone ID
+
+Map Domain → ALB
+
+Create CNAME or A record (Alias):
+
+Example:
+Record	Value
+cart.example.com	ALB DNS
+product.example.com	ALB DNS
+payments.example.com	ALB DNS
+
+
+
+
 Step 2: Create ACM Certificate
 
 Request certificate for:
@@ -131,7 +164,7 @@ product.example.com
 payments.example.com
 Step 3: Update Ingress
 
-Add:
+Update ingress.yaml:
 
 alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
 alb.ingress.kubernetes.io/certificate-arn: <cert-arn>
