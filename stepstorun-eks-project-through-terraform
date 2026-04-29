@@ -8,14 +8,14 @@ Based on your instructions:
 
 cd eks-project/terraform/eks
 
-👉 Make sure this folder contains:
+Make sure this folder contains:
 
 main.tf
 eks.tf
 vpc.tf
 provider.tf
 dev.tfvars
-☁️ 3. Configure AWS CLI (mandatory)
+3. Configure AWS CLI (mandatory)
 aws configure
 
 Set:
@@ -23,21 +23,25 @@ Set:
 AWS Access Key
 Secret Key
 Region → us-east-1
-🪣 4. Create S3 backend bucket (if not already created)
+4. Create S3 backend bucket (if not already created)
+Through aws console or through command
 
 If your backend.tf uses S3:
 
 aws s3 mb s3://your-terraform-state-bucket --region us-east-1
 
-👉 Also ensure DynamoDB table exists if state locking is used.
+Also ensure DynamoDB table exists if state locking is used.
 
-🔑 5. Create EC2 Key Pair (VERY IMPORTANT)
+5. Create EC2 Key Pair (VERY IMPORTANT)
 
 Your project uses:
 
 data "aws_key_pair"
 
-So key MUST already exist in AWS.
+So key MUST already exist in AWS.(create manually through aws console)
+
+If you use resource "aws_key_pair"
+Generate through ssh-keygen
 
 Step 1: Create local key
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/ec2_keypair
@@ -48,34 +52,29 @@ aws ec2 import-key-pair \
   --region us-east-1
 Step 3: Verify
 aws ec2 describe-key-pairs --key-names ec2_keypair
-⚙️ 6. Initialize Terraform
+6. Initialize Terraform
 terraform init
 
-👉 This will:
+This will:
 
 download AWS provider
 initialize backend (S3)
 prepare modules
-🔍 7. Validate configuration
+
+7. Validate configuration
 terraform validate
-📊 8. Plan infrastructure
+
+8. Plan infrastructure
 terraform plan -var-file="dev.tfvars"
 
 Check carefully:
+VPC creation, EKS cluster ,Node groups, EC2 bastion, IAM roles
 
-VPC creation
-EKS cluster
-Node groups
-EC2 bastion
-IAM roles
-🚀 9. Apply infrastructure
+9. Apply infrastructure
 terraform apply -var-file="dev.tfvars"
+Type:yes
 
-Type:
-
-yes
-
-Post Deployment (Bastion Host Access)
+10. Post Deployment (Bastion Host Access)
 
 Because cluster is private:
 
@@ -88,11 +87,12 @@ aws eks update-kubeconfig --region us-east-1 --name eks-demo
 Verify:
 
 kubectl get nodes
-13. Install Helm (inside bastion)
+11. Install Helm (inside bastion)
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 chmod 700 get_helm.sh
 ./get_helm.sh
-14. Install AWS Load Balancer Controller
+
+12. Install AWS Load Balancer Controller
 helm repo add eks https://aws.github.io/eks-charts
 helm repo update
 
@@ -109,7 +109,7 @@ Verify:
 
 kubectl get deployment -n kube-system
 
-15. Deploy Microservices
+13. Deploy Microservices
 kubectl apply -f ns.yaml
 kubectl apply -f product.yaml
 kubectl apply -f cart.yaml
@@ -127,18 +127,15 @@ Test in browser:
 
 http://<ALB-DNS>
 
- 17. Enable TLS (HTTPS Setup)
+ 14. Enable TLS (HTTPS Setup)
 Step 1: Create Route53 Hosted Zone
 example.com
 
-
 Go to AWS Console:
-
 Create Hosted Zone
 Domain: example.com
 
 This gives:
-
 NS records
 Hosted zone ID
 
@@ -151,9 +148,6 @@ Record	Value
 cart.example.com	ALB DNS
 product.example.com	ALB DNS
 payments.example.com	ALB DNS
-
-
-
 
 Step 2: Create ACM Certificate
 
@@ -174,7 +168,7 @@ Apply:
 
 kubectl apply -f ingress.yaml
 
-18. Host-Based Routing (Production)
+15. Host-Based Routing (Production)
 Domain	Service
 cart.example.com	Cart
 product.example.com	Product
@@ -182,7 +176,3 @@ payments.example.com	Payments
 
 19. Destroy Infrastructure (Cleanup)
 terraform destroy -var-file="dev.tfvars"
-
-
-
-
