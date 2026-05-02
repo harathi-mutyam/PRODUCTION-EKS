@@ -85,6 +85,14 @@ Ensure the region in backend.tf matches the region where your Terraform state st
 
 create a s3 bucket in aws account
 
+change in dev.tfvars file 
+
+amiid and region
+
+key_name      = "ec2_keypair"
+
+ami_id        = "ami-0ed094fb1304fd857 "    #"ami-02b8269d5e85954ef"
+
 **4. Navigate to the Terraform Directory**
 
 Always run Terraform commands from the folder where main.tf exists:
