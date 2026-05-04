@@ -32,6 +32,13 @@ aws s3 mb s3://your-terraform-state-bucket --region us-east-1
 
 Also ensure DynamoDB table exists if state locking is used.
 
+
+In dev.tfvars Chance Ami id of Ubuntu Server Based on region
+
+region
+
+Server Type t3.small or through.micro
+
 5. Create EC2 Key Pair (VERY IMPORTANT)
 
 Your project uses:
