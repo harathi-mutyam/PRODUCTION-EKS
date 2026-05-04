@@ -102,13 +102,15 @@ data "aws_iam_policy_document" "aws_lb_controller_irsa_assume_role" {
 
     condition {
       test     = "StringEquals"
-      variable = "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:sub"
+      variable = "${local.oidc_issuer}:sub"
+      #variable = "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:sub"
       values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
     }
 
     condition {
       test     = "StringEquals"
-      variable = "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:aud"
+      variable = "${local.oidc_issuer}:aud"
+      #variable = "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:aud"
       values   = ["sts.amazonaws.com"]
     }
 
@@ -120,8 +122,13 @@ data "aws_iam_policy_document" "aws_lb_controller_irsa_assume_role" {
 }
 
 resource "aws_iam_role" "aws_lb_controller" {
-  name               = "AWSLoadBalancerControllerRole-${var.cluster_name}"
+  name = "${var.cluster_name}-AWSLoadBalancerControllerRole-${random_integer.randoem_suffix.result}"
+  #name               = "AWSLoadBalancerControllerRole-${var.cluster_name}"
   assume_role_policy = data.aws_iam_policy_document.aws_lb_controller_irsa_assume_role.json
+
+  depends_on = [
+    aws_iam_openid_connect_provider.eks_oidc
+  ]
 }
 
 
