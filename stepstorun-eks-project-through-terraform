@@ -132,6 +132,28 @@ Test in browser:
 http://<ALB-DNS>
 
  14. Enable TLS (HTTPS Setup)
+Request an acm certificate in aws console
+
+step 1: choose Request a public certificate  --> click on next --> Fully qualified domain name : your godaddy domainname (*.ehmutyam.xyz)
+
+click on request
+
+Certificate Status --> Pending
+
+Open godaddy.com  --> Domain -->DNS  ---> Add New Record  -->
+
+Type: CNAME 
+
+Name : Copy CNAME Name upto before .ehmutyam.xyz (.domainname)  from aws console --->Paste it here
+
+value: Copy CNAME value from aws console (completly)  -->paste it here
+
+after the above procedure
+
+Certificate Status in Aws Console --> Issued
+
+
+
 Step 1: Create Route53 Hosted Zone
 example.com
 
