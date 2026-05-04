@@ -1,4 +1,4 @@
-key_name      = "ec2_keypair"
+key_name      = "ec2_keypair"   #create a ec2 keypair in aws console
 ami_id        = "ami-02b8269d5e85954ef"   #replace with your ubuntu ami id based on region
 instance_type = "t3.medium"
 
