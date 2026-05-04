@@ -198,11 +198,15 @@ product.example.com
 payments.example.com
 Step 3: Update Ingress
 
-Update ingress.yaml:
+Update ingress.yaml: unkommentiert these lines
 
 alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
 alb.ingress.kubernetes.io/certificate-arn: <cert-arn>
 alb.ingress.kubernetes.io/ssl-redirect: '443'
+
+replace cert-arn with your ACM certificate ARN
+
+
 
 Apply:
 
