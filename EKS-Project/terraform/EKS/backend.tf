@@ -7,7 +7,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "backend-bucket-wiings284"
+    bucket       = "backend-bucket-wiings284"   #create s3 bucket through aws console .and replace bucket name here
     key          = "eks/terraform.tfstate"
     region       = "us-east-1"
     use_lockfile = true
