@@ -178,5 +178,9 @@ cart.example.com	Cart
 product.example.com	Product
 payments.example.com	Payments
 
+delete load balancer from baston server gitbash
+kubectl delete -f ingress.yaml
+
+run this command in vs code gitbash
 16. Destroy Infrastructure (Cleanup)
 terraform destroy -var-file="dev.tfvars"
