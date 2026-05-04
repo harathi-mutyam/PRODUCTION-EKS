@@ -111,6 +111,13 @@ Verify:
 
 git clone "https://github.com/harathi-mutyam/PRODUCTION-EKS.git"
 
+
+cd production-eks
+
+cd eks-project
+
+cd k8s
+
 kubectl get deployment -n kube-system
 
 13. Deploy Microservices
