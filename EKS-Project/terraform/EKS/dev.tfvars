@@ -1,6 +1,6 @@
 key_name      = "ec2_keypair"   #create a ec2 keypair in aws console
 ami_id        = "ami-02b8269d5e85954ef"   #replace with your ubuntu ami id based on region
-instance_type = "t3.medium"
+instance_type = "t3.medium"  # replace with t3.small
 
 env                       = "dev"
 aws_region                = "us-east-1"
@@ -29,7 +29,7 @@ endpoint_private_access   = true
 endpoint_public_access    = false
 
 
-instance_types   = ["t3.medium"]
+instance_types   = ["t3.medium"]  # t3.small
 desired_capacity = 1
 min_capacity     = 1
 max_capacity     = 2
