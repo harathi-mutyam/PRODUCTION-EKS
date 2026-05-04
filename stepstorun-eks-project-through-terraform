@@ -178,6 +178,8 @@ cart.example.com	Cart
 product.example.com	Product
 payments.example.com	Payments
 
+** 16. Process of Deletion **
+
 delete load balancer from baston server gitbash
 kubectl delete -f ingress.yaml
 
