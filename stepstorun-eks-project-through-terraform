@@ -168,55 +168,258 @@ Certificate Status in Aws Console --> Issued
 
 
 
-Step 2: Create Route53 Hosted Zone
-example.com
+step 2: 
 
-Go to AWS Console:
-Create Hosted Zone
-Domain: example.com
+Create Route53 Hosted Zone
 
-This gives:
-NS records
-Hosted zone ID
+Go to AWS Console → Route53
 
-Map Domain → ALB
+Click Hosted Zones
+Click Create Hosted Zone
+Fill:
+Domain: ehmutyam.xyz
+Type: Public Hosted Zone
+Click Create
 
-Create CNAME or A record (Alias):
+You will see 2 important things:
+NS (Name Servers) → 4 values
+SOA record
 
-Example:
-Record	Value
-cart.example.com	ALB DNS
-product.example.com	ALB DNS
-payments.example.com	ALB DNS
+Example: 4 values of ns servers
 
-Step 3: Create ACM Certificate
+ns-123.awsdns-45.org
+ns-456.awsdns-90.com
+ns-789.awsdns-12.net
+ns-222.awsdns-34.co.uk
 
-Request certificate for:
+go to GoDaddy in browser:
 
-cart.example.com
-product.example.com
-payments.example.com
-Step 4: Update Ingress
+Login
+Go to:
+My Products → ehmutyam.xyz → DNS
 
-Update ingress.yaml: unkommentiert these lines
+Find Nameservers Tab
 
-alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
-alb.ingress.kubernetes.io/certificate-arn: <cert-arn>  #replace with your acm certificate arn
-alb.ingress.kubernetes.io/ssl-redirect: '443'
+Click Change 
 
-replace cert-arn with your ACM certificate ARN
+Select:
+
+Custom Nameservers : select “I’ll use my own nameservers”
+
+Paste the 4 Route53 NS records without end . (remove last . from NSServers values)
+
+for example:
+
+ns-xxx.awsdns-xx.org
+ns-xxx.awsdns-xx.com
+ns-xxx.awsdns-xx.net
+ns-xxx.awsdns-xx.co.uk
+
+Save
+
+Check ACM Region
+
+Make sure certificate is in:us-east-1 (N. Virginia) ✅ REQUIRED for ALB
+
+Now we connect AWS Load Balancer → Kubernetes
+
+
+mv ingress.yaml to oldingress.yaml
+
+create a new ingress.yaml file for host based 
+
+vim ingress.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: e-commerce-ingress
+  namespace: e-commerce
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:747815018096:certificate/32016496-0198-4748-8d71-ab067ab2643d   #replace with your arn
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+spec:
+  ingressClassName: alb
+  rules:
+  - host: cart.ehmutyam.xyz
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: cart-service
+            port:
+              number: 80
+
+  - host: product.ehmutyam.xyz
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: product-service
+            port:
+              number: 80
+
+  - host: payments.ehmutyam.xyz
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: payments-service
+            port:
+              number: 80
+
+
+if not possible replace with your 
+cat <<EOF > ingress.yaml
+
+above content
+
+EOF
 
 
 
-Apply:
+
+# kubectl apply -f ingress.yaml
+
+optional 
+
+kubectl get ingress
+
+You will see:
+
+NAME                     HOSTS   ADDRESS
+e-commerce-ingress    cart.ehmuyam.xyz,..     abc123.us-east-1.elb.amazonaws.com
+
+kubectl get ingress
+
+
+kubectl delete ingress <ingress name>
+
 
 kubectl apply -f ingress.yaml
 
-15. Host-Based Routing (Production)
-Domain	Service
-cart.example.com	Cart
-product.example.com	Product
-payments.example.com	Payments
+
+
+
+Connect Domain → ALB (Route53)
+
+Now go to Route53:
+
+Hosted Zone → ehmutyam.xyz
+
+Create records:
+ 
+
+👉 For EACH subdomain:
+1. cart.ehmutyam.xyz
+
+REcord name: cart 
+RecordType: A record
+
+Enable: Alias = YES
+
+Route Traffic to : select Alias to Application and Classic Load Balancer
+
+select region of your ALB : US East(N. Virginia)
+select your ALB here  (for example: dualstack.k8s-ecommerc-ecommerc-949981ca5a-1099050560.us-east-1.elb.amazonaws.com)
+
+2. product.ehmutyam.xyz
+
+REcord name: product 
+
+
+same foloow here also
+
+3. payments.ehmutyam.xyz
+
+REcord name: payments
+
+same ALB
+
+ in cart.yaml file  change this line because you are using the nginx
+
+  #cat > /usr/share/nginx/html/cart/index.html <<EOF
+   cat > /usr/share/nginx/html/index.html <<EOF
+
+change at same as 
+ annotations:
+    #alb.ingress.kubernetes.io/healthcheck-path: /cart/index.html
+    alb.ingress.kubernetes.io/healthcheck-path: /index.html
+
+
+
+in product file change this line because you are using the nginx
+
+  #cat > /usr/share/nginx/html/product/html  <<EOF
+
+   cat > /usr/share/nginx/html/index.html <<EOF
+
+ annotations:
+    #alb.ingress.kubernetes.io/healthcheck-path: /product/index.html
+
+    alb.ingress.kubernetes.io/healthcheck-path: /index.html
+
+
+kubectl apply -f cart.yaml
+kubectl apply -f product.yaml
+kubectl apply -f payments.yaml
+kubectl apply -f ingress.yaml -n e-commerce
+
+
+kubectl rollout restart deployment -n e-commerce
+
+
+kubectl get pods -n e-commerce
+
+kubectl get svc -n e-commerce
+
+kubectl get ingress -n e-commerce
+
+
+doubt: 
+
+What you actually built
+
+You now have:
+
+1. ALB path-based routing
+
+From your ALB rules:
+
+/product → product target group
+/cart → cart target group
+/ → payments (default)
+
+👉 This is path-based routing
+
+till here
+
+
+
+kubectl describe ingress e-commerce-ingress -n e-commerce
+
+
+kubectl delete ingress e-commerce-ingress -n e-commerce
+
+
+kubectl apply -f ingress.yaml
+
+
+
+cart.ehmutyam.xyz → Cart Service
+product.ehmutyam.xyz → Product Service
+payments.ehmutyam.xyz → Payments Service
+
 
 ** 16. Process of Deletion **
 
