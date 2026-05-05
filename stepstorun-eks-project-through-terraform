@@ -112,7 +112,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set vpcId=<vpc-id> \
   --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=<IAM-role>    
 
-#replace with your clustername ,vpc id and iam role of loadbalancer(search in aws console iam-->roles-->AWSLoadBalancerControllerRole   copy the arn ) arn 
+#replace with your clustername ,vpc id and iam role of loadbalancer(search in aws console iam-->roles-->search  AWSLoadBalancerControllerRole   copy the arn ) arn 
 
 Verify:
 
@@ -168,7 +168,7 @@ Certificate Status in Aws Console --> Issued
 
 
 
-Step 1: Create Route53 Hosted Zone
+Step 2: Create Route53 Hosted Zone
 example.com
 
 Go to AWS Console:
@@ -189,19 +189,19 @@ cart.example.com	ALB DNS
 product.example.com	ALB DNS
 payments.example.com	ALB DNS
 
-Step 2: Create ACM Certificate
+Step 3: Create ACM Certificate
 
 Request certificate for:
 
 cart.example.com
 product.example.com
 payments.example.com
-Step 3: Update Ingress
+Step 4: Update Ingress
 
 Update ingress.yaml: unkommentiert these lines
 
 alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
-alb.ingress.kubernetes.io/certificate-arn: <cert-arn>
+alb.ingress.kubernetes.io/certificate-arn: <cert-arn>  #replace with your acm certificate arn
 alb.ingress.kubernetes.io/ssl-redirect: '443'
 
 replace cert-arn with your ACM certificate ARN
