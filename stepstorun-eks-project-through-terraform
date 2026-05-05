@@ -420,6 +420,10 @@ cart.ehmutyam.xyz → Cart Service
 product.ehmutyam.xyz → Product Service
 payments.ehmutyam.xyz → Payments Service
 
+https://cart.ehmutyam.xyz → Cart Service
+https:product.ehmutyam.xyz → Product Service
+https:payments.ehmutyam.xyz → Payments Service
+
 
 ** 16. Process of Deletion **
 
