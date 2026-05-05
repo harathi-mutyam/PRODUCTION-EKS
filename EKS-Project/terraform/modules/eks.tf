@@ -1,444 +1,92 @@
-data "aws_caller_identity" "current" {}
+resource "aws_eks_cluster" "eks" {
+    count = var.create_eks_cluster ? 1 : 0
+    name = var.cluster_name
+    role_arn = aws_iam_role.eks_cluster_role[count.index].arn
+    version = var.kubernetes_version
 
-locals {
-    cluster-name = var.cluster_name 
-    account_id = data.aws_caller_identity.current.account_id
-    region     = var.aws_region
+    vpc_config {
+        subnet_ids =  [aws_subnet.private_subnet[0].id, aws_subnet.private_subnet[1].id]
+        endpoint_private_access = var.endpoint_private_access
+        endpoint_public_access = var.endpoint_public_access
+        security_group_ids = [aws_security_group.eks-cluster-sg.id]
+    }
+
+    access_config {
+        authentication_mode = "API"
+        bootstrap_cluster_creator_admin_permissions = true
+    }
+
+    tags = {
+        Name = var.cluster_name
+        Env  = var.env
+    }
+
 }
-locals {
-  oidc_issuer = replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")
-}
 
 
-resource "random_integer" "randoem_suffix" {
-    min = 1000
-    max = 9999
-  
-}
-
-/*data "tls_certificate" "eks-certificate" {
-  url = aws_eks_cluster.eks[0].identity[0].oidc[0].issuer
+/*resource "aws_iam_openid_connect_provider" "eks-oidc" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks-certificate.certificates[0].sha1_fingerprint]
+  url             = data.tls_certificate.eks-certificate.url
 }*/
 
-resource "aws_iam_role" "eks_cluster_role" {
-    count = var.create_eks_cluster_role ? 1 : 0
-    name = "${local.cluster-name}-eks-cluster-role-${random_integer.randoem_suffix.result}"
 
-    assume_role_policy = jsonencode({
-        Version = "2012-10-17"
-        Statement = [
-            {
-                Action = "sts:AssumeRole"
-                Effect = "Allow"
-                Principal = {
-                    Service = "eks.amazonaws.com"
-                }
-            },
-        ]
-    })
+resource "aws_eks_addon" "eks-addons" {
+    for_each = { for idx, addon in var.addons : idx => addon }
+    cluster_name = aws_eks_cluster.eks[0].name
+    addon_name   = each.value.name
+    addon_version = each.value.version
+
+    depends_on = [ aws_eks_node_group.ondemand-node ]
 }
 
-
-resource "aws_iam_role_policy_attachment" "eks_cluster_role_policy_attachment" {
-    count = var.create_eks_cluster_role ? 1 : 0
-    role     = aws_iam_role.eks_cluster_role[count.index].name
-    policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  
-}
-
-
-resource "aws_iam_role" "eks_nodegroup_role" {
-    count = var.create_eks_nodegroup_role ? 1 : 0
-    name = "${local.cluster-name}-eks-nodegroup-role-${random_integer.randoem_suffix.result}"
-
-    assume_role_policy = jsonencode({
-        Version = "2012-10-17"
-        Statement = [
-            {
-                Action = "sts:AssumeRole"
-                Effect = "Allow"
-                Principal = {
-                    Service = "ec2.amazonaws.com"
-                }
-            },
-        ]
-    })
-}
-
-resource "aws_iam_role_policy_attachment" "eks_nodegroup_role_policy_attachment" {
-    count = var.create_eks_nodegroup_role ? 1: 0
-    role     = aws_iam_role.eks_nodegroup_role[count.index].name
-    policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "eks-cni-policy-attachment" {
-    count = var.create_eks_nodegroup_role ? 1: 0
-    role     = aws_iam_role.eks_nodegroup_role[count.index].name
-    policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  
-}
-
-resource "aws_iam_role_policy_attachment" "ecr-readonly-policy-attachment" {
-    count = var.create_eks_nodegroup_role ? 1: 0
-    role     = aws_iam_role.eks_nodegroup_role[count.index].name
-    policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  
-}
-
-resource "aws_iam_role_policy_attachment" "ebs-csi-policy-attachment" {
-    count = var.create_eks_nodegroup_role ? 1: 0
-    role     = aws_iam_role.eks_nodegroup_role[count.index].name
-    policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
-  
-}
-
-
-# ===  IRSA for AWS load Balancer controller ===
-
-data "aws_iam_policy_document" "aws_lb_controller_irsa_assume_role" {
-  statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-    effect  = "Allow"
-
-    condition {
-      test     = "StringEquals"
-      variable = "${local.oidc_issuer}:sub"
-      #variable = "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "${local.oidc_issuer}:aud"
-      #variable = "${replace(aws_iam_openid_connect_provider.eks_oidc.url, "https://", "")}:aud"
-      values   = ["sts.amazonaws.com"]
-    }
-
-    principals {
-      type        = "Federated"
-      identifiers = [aws_iam_openid_connect_provider.eks_oidc.arn]
-    }
-  }
-}
-
-resource "aws_iam_role" "aws_lb_controller" {
-  name = "${var.cluster_name}-AWSLoadBalancerControllerRole-${random_integer.randoem_suffix.result}"
-  #name               = "AWSLoadBalancerControllerRole-${var.cluster_name}"
-  assume_role_policy = data.aws_iam_policy_document.aws_lb_controller_irsa_assume_role.json
+resource "aws_eks_addon" "ebs_csi" {
+  cluster_name             = aws_eks_cluster.eks[0].name
+  addon_name               = "aws-ebs-csi-driver"
+  addon_version            = "v1.46.0-eksbuild.1"
+  service_account_role_arn = aws_iam_role.ebs_csi_irsa_role.arn
 
   depends_on = [
-    aws_iam_openid_connect_provider.eks_oidc
-  ]
+  aws_eks_node_group.ondemand-node,
+  aws_iam_role_policy_attachment.ebs_csi_attach
+]
 }
 
 
-resource "aws_iam_policy" "aws_lb_controller_policy" {
-  name   = "AWSLoadBalancerControllerPolicy-${var.cluster_name}"
-  policy = jsonencode(
-        {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "iam:CreateServiceLinkedRole"
-            ],
-            "Resource": "*",
-            "Condition": {
-                "StringEquals": {
-                    "iam:AWSServiceName": "elasticloadbalancing.amazonaws.com"
-                }
-            }
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:DescribeAccountAttributes",
-                "ec2:DescribeAddresses",
-                "ec2:DescribeAvailabilityZones",
-                "ec2:DescribeInternetGateways",
-                "ec2:DescribeVpcs",
-                "ec2:DescribeVpcPeeringConnections",
-                "ec2:DescribeSubnets",
-                "ec2:DescribeSecurityGroups",
-                "ec2:DescribeInstances",
-                "ec2:DescribeNetworkInterfaces",
-                "ec2:DescribeTags",
-                "ec2:GetCoipPoolUsage",
-                "ec2:DescribeCoipPools",
-                "ec2:GetSecurityGroupsForVpc",
-                "ec2:DescribeIpamPools",
-                "ec2:DescribeRouteTables",
-                "elasticloadbalancing:DescribeLoadBalancers",
-                "elasticloadbalancing:DescribeLoadBalancerAttributes",
-                "elasticloadbalancing:DescribeListeners",
-                "elasticloadbalancing:DescribeListenerCertificates",
-                "elasticloadbalancing:DescribeSSLPolicies",
-                "elasticloadbalancing:DescribeRules",
-                "elasticloadbalancing:DescribeTargetGroups",
-                "elasticloadbalancing:DescribeTargetGroupAttributes",
-                "elasticloadbalancing:DescribeTargetHealth",
-                "elasticloadbalancing:DescribeTags",
-                "elasticloadbalancing:DescribeTrustStores",
-                "elasticloadbalancing:DescribeListenerAttributes",
-                "elasticloadbalancing:DescribeCapacityReservation"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "cognito-idp:DescribeUserPoolClient",
-                "acm:ListCertificates",
-                "acm:DescribeCertificate",
-                "iam:ListServerCertificates",
-                "iam:GetServerCertificate",
-                "waf-regional:GetWebACL",
-                "waf-regional:GetWebACLForResource",
-                "waf-regional:AssociateWebACL",
-                "waf-regional:DisassociateWebACL",
-                "wafv2:GetWebACL",
-                "wafv2:GetWebACLForResource",
-                "wafv2:AssociateWebACL",
-                "wafv2:DisassociateWebACL",
-                "shield:GetSubscriptionState",
-                "shield:DescribeProtection",
-                "shield:CreateProtection",
-                "shield:DeleteProtection"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:AuthorizeSecurityGroupIngress",
-                "ec2:RevokeSecurityGroupIngress"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:CreateSecurityGroup"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:CreateTags"
-            ],
-            "Resource": "arn:aws:ec2:*:*:security-group/*",
-            "Condition": {
-                "StringEquals": {
-                    "ec2:CreateAction": "CreateSecurityGroup"
-                },
-                "Null": {
-                    "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
-                }
-            }
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:CreateTags",
-                "ec2:DeleteTags"
-            ],
-            "Resource": "arn:aws:ec2:*:*:security-group/*",
-            "Condition": {
-                "Null": {
-                    "aws:RequestTag/elbv2.k8s.aws/cluster": "true",
-                    "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
-                }
-            }
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ec2:AuthorizeSecurityGroupIngress",
-                "ec2:RevokeSecurityGroupIngress",
-                "ec2:DeleteSecurityGroup"
-            ],
-            "Resource": "*",
-            "Condition": {
-                "Null": {
-                    "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
-                }
-            }
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "elasticloadbalancing:CreateLoadBalancer",
-                "elasticloadbalancing:CreateTargetGroup"
-            ],
-            "Resource": "*",
-            "Condition": {
-                "Null": {
-                    "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
-                }
-            }
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "elasticloadbalancing:CreateListener",
-                "elasticloadbalancing:DeleteListener",
-                "elasticloadbalancing:CreateRule",
-                "elasticloadbalancing:DeleteRule"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "elasticloadbalancing:AddTags",
-                "elasticloadbalancing:RemoveTags"
-            ],
-            "Resource": [
-                "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
-                "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
-                "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
-            ],
-            "Condition": {
-                "Null": {
-                    "aws:RequestTag/elbv2.k8s.aws/cluster": "true",
-                    "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
-                }
-            }
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "elasticloadbalancing:AddTags",
-                "elasticloadbalancing:RemoveTags"
-            ],
-            "Resource": [
-                "arn:aws:elasticloadbalancing:*:*:listener/net/*/*/*",
-                "arn:aws:elasticloadbalancing:*:*:listener/app/*/*/*",
-                "arn:aws:elasticloadbalancing:*:*:listener-rule/net/*/*/*",
-                "arn:aws:elasticloadbalancing:*:*:listener-rule/app/*/*/*"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "elasticloadbalancing:ModifyLoadBalancerAttributes",
-                "elasticloadbalancing:SetIpAddressType",
-                "elasticloadbalancing:SetSecurityGroups",
-                "elasticloadbalancing:SetSubnets",
-                "elasticloadbalancing:DeleteLoadBalancer",
-                "elasticloadbalancing:ModifyTargetGroup",
-                "elasticloadbalancing:ModifyTargetGroupAttributes",
-                "elasticloadbalancing:DeleteTargetGroup",
-                "elasticloadbalancing:ModifyListenerAttributes",
-                "elasticloadbalancing:ModifyCapacityReservation",
-                "elasticloadbalancing:ModifyIpPools"
-            ],
-            "Resource": "*",
-            "Condition": {
-                "Null": {
-                    "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
-                }
-            }
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "elasticloadbalancing:AddTags"
-            ],
-            "Resource": [
-                "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
-                "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
-                "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
-            ],
-            "Condition": {
-                "StringEquals": {
-                    "elasticloadbalancing:CreateAction": [
-                        "CreateTargetGroup",
-                        "CreateLoadBalancer"
-                    ]
-                },
-                "Null": {
-                    "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
-                }
-            }
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "elasticloadbalancing:RegisterTargets",
-                "elasticloadbalancing:DeregisterTargets"
-            ],
-            "Resource": "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "elasticloadbalancing:SetWebAcl",
-                "elasticloadbalancing:ModifyListener",
-                "elasticloadbalancing:AddListenerCertificates",
-                "elasticloadbalancing:RemoveListenerCertificates",
-                "elasticloadbalancing:ModifyRule",
-                "elasticloadbalancing:SetRulePriorities"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "eks:DescribeCluster"
-            ],
-            "Resource": "*"
-        }
-    ]
-})
+resource "aws_eks_node_group" "ondemand-node" {
+    cluster_name = aws_eks_cluster.eks[0].name
+    node_group_name = "${var.cluster_name}-ondemand-node-group"
+    node_role_arn = aws_iam_role.eks_nodegroup_role[0].arn
+
+    subnet_ids = [aws_subnet.private_subnet[0].id, aws_subnet.private_subnet[1].id]
+
+    scaling_config {
+      desired_size = var.desired_capacity
+      min_size     = var.min_capacity
+      max_size     = var.max_capacity
+    }
+
+    instance_types = var.instance_types
+    capacity_type  = "ON_DEMAND"
+
+    labels = {
+      type = "ondemand"
+      node-role = "system"
+    }
+
+    update_config {
+      max_unavailable = 1
+    }
+
+
+    tags = {
+      "Name" = "${var.cluster_name}-ondemand-nodes"
+    }
+
+    tags_all = {
+      "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+    }
+
+    depends_on = [ aws_eks_cluster.eks ]
 }
 
-
-resource "aws_iam_role_policy_attachment" "aws_lb_controller_attach" {
-  role       = aws_iam_role.aws_lb_controller.name
-  policy_arn = aws_iam_policy.aws_lb_controller_policy.arn
-}
-
-resource "aws_iam_role" "ebs_csi_irsa_role" {
-  name = "${var.cluster_name}-ebs-csi-irsa-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Federated = aws_iam_openid_connect_provider.eks_oidc.arn
-        }
-        Action = "sts:AssumeRoleWithWebIdentity"
-
-        Condition = {
-          StringEquals = {
-            "${local.oidc_issuer}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
-            "${local.oidc_issuer}:aud" = "sts.amazonaws.com"
-          }
-        }
-      }
-    ]
-  })
-}
-resource "aws_iam_role_policy_attachment" "ebs_csi_attach" {
-  role       = aws_iam_role.ebs_csi_irsa_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
-}
-
-data "tls_certificate" "eks_oidc_cert" {
-  url = aws_eks_cluster.eks[0].identity[0].oidc[0].issuer
-}
-
-resource "aws_iam_openid_connect_provider" "eks_oidc" {
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.eks_oidc_cert.certificates[0].sha1_fingerprint]
-  url             = aws_eks_cluster.eks[0].identity[0].oidc[0].issuer
-
-  tags = {
-    Name = "${var.cluster_name}-eks_oidc"
-  }
-}
