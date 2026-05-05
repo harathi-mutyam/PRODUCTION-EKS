@@ -134,8 +134,21 @@ kubectl apply -f ns.yaml
 kubectl apply -f product.yaml
 kubectl apply -f cart.yaml
 kubectl apply -f payments.yaml
+
+vim path-ingress.yaml
+
+comment these 3 lines .These lines are related to https certificate  lines 
+
+
+#alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
+#alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:071325923620:certificate/e6c8ab5f-3dcd-42b6-bbbb-2ff4e2b811fc
+#alb.ingress.kubernetes.io/ssl-redirect: '443'
+
 16. Ingress Deployment (HTTP ALB)
-kubectl apply -f ingress.yaml
+
+kubectl apply -f path-ingress.yaml
+
+loadbalancer created now
 
 kubectl get ingress -n e-commerce
 
@@ -145,7 +158,11 @@ ALB DNS name → k8s-default-xxxx.elb.amazonaws.com
 
 Test in browser:
 
-http://<ALB-DNS>
+http://<ALB-DNS>    -->payments
+http://<ALB-DNS>/cart   --->cart
+http://<ALB-DNS>/products   --->products
+
+
 
  14. Enable TLS (HTTPS Setup)
 Request an acm certificate in aws console
@@ -176,8 +193,7 @@ Create Route53 Hosted Zone
 
 Go to AWS Console → Route53
 
-Click Hosted Zones
-Click Create Hosted Zone
+Click Hosted Zones  -->  Click Create Hosted Zone --->
 Fill:
 Domain: ehmutyam.xyz
 Type: Public Hosted Zone
@@ -226,9 +242,40 @@ Make sure certificate is in:us-east-1 (N. Virginia) ✅ REQUIRED for ALB
 Now we connect AWS Load Balancer → Kubernetes
 
 
-mv ingress.yaml to oldingress.yaml
+open path-ingress.yaml file
 
-create a new ingress.yaml file for host based 
+uncomment these lines
+alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
+alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:071325923620:certificate/e6c8ab5f-3dcd-42b6-bbbb-2ff4e2b811fc     # Replace with your certificate arn number here
+alb.ingress.kubernetes.io/ssl-redirect: '443'
+
+make the above changes  and save the file
+
+kubectl apply -f ingress.yaml
+
+kubectl get ingress -n e-commerce
+
+NAME                 CLASS   HOSTS   ADDRESS                                                                   PORTS   AGE
+e-commerce-ingress   alb     *       k8s-ecommerc-ecommerc-949981ca5a-1099050560.us-east-1.elb.amazonaws.com   80      32s
+
+
+check it in browser  (doubt here)
+
+
+
+
+for debugging  purpose run these commands
+
+nslookup k8s-ecommerc-ecommerc-949981ca5a-1099050560.us-east-1.elb.amazonaws.com
+
+kubectl get svc
+
+
+
+create a new ingress.yaml file for host based  or make changes in path-ingress.yaml add host:cart.ehmutyam.xyz under rules: and remove path: /product and /cart
+
+also add under annotations:  -->kubernetes.io/ingress.class: alb this line
+ 
 
 vim ingress.yaml
 
@@ -289,8 +336,6 @@ above content
 EOF
 
 
-
-
 # kubectl apply -f ingress.yaml
 
 optional 
@@ -307,46 +352,6 @@ kubectl get ingress
 
 kubectl delete ingress <ingress name>
 
-
-kubectl apply -f ingress.yaml
-
-
-
-
-Connect Domain → ALB (Route53)
-
-Now go to Route53:
-
-Hosted Zone → ehmutyam.xyz
-
-Create records:
- 
-
-👉 For EACH subdomain:
-1. cart.ehmutyam.xyz
-
-REcord name: cart 
-RecordType: A record
-
-Enable: Alias = YES
-
-Route Traffic to : select Alias to Application and Classic Load Balancer
-
-select region of your ALB : US East(N. Virginia)
-select your ALB here  (for example: dualstack.k8s-ecommerc-ecommerc-949981ca5a-1099050560.us-east-1.elb.amazonaws.com)
-
-2. product.ehmutyam.xyz
-
-REcord name: product 
-
-
-same foloow here also
-
-3. payments.ehmutyam.xyz
-
-REcord name: payments
-
-same ALB
 
  in cart.yaml file  change this line because you are using the nginx
 
@@ -386,6 +391,45 @@ kubectl get pods -n e-commerce
 kubectl get svc -n e-commerce
 
 kubectl get ingress -n e-commerce
+
+kubectl apply -f ingress.yaml
+
+
+Connect Domain → ALB (Route53)
+
+Now go to Route53:
+
+Hosted Zone → ehmutyam.xyz
+
+Create records:
+ 
+
+👉 For EACH subdomain:
+1. cart.ehmutyam.xyz
+
+REcord name: cart 
+RecordType: A record
+
+Enable: Alias = YES
+
+Route Traffic to : select Alias to Application and Classic Load Balancer
+
+select region of your ALB : US East(N. Virginia)
+select your ALB here  (for example: dualstack.k8s-ecommerc-ecommerc-949981ca5a-1099050560.us-east-1.elb.amazonaws.com)
+
+2. product.ehmutyam.xyz
+
+REcord name: product 
+
+
+same foloow here also
+
+3. payments.ehmutyam.xyz
+
+REcord name: payments
+
+same ALB
+
 
 
 doubt: 
