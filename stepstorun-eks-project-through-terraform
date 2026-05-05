@@ -37,7 +37,7 @@ In dev.tfvars Chance Ami id of Ubuntu Server Based on region
 
 region
 
-Server Type t3.small or through.micro
+change Server Type t3.small to large
 
 5. Create EC2 Key Pair (VERY IMPORTANT)
 
