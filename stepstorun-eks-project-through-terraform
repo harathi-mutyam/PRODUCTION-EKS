@@ -119,9 +119,11 @@ Verify:
 git clone "https://github.com/harathi-mutyam/PRODUCTION-EKS.git"
 
 
-cd production-eks
+cd cd PRODUCTION-EKS
 
-cd eks-project
+ls
+
+cd EKS-Project
 
 cd k8s
 
