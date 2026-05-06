@@ -216,7 +216,8 @@ After resource creation completes, verify in the AWS Console that the bastion se
 
 Because cluster is private:SSH into Baston server 
 
-ssh -i ~/.ssh/ec2_keypair ubuntu@<bastion-public-ip>   
+ssh -i ~/.ssh/ec2_keypair ubuntu@bastion-public-ip
+
 
 (example: ssh -i Downloads/ec2_keypair.pem ubuntu@<bastion public_ip>)
 
@@ -254,10 +255,10 @@ Install:
 
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
-  --set clusterName=<eks-demo> \
+  --set clusterName=(dev-eks-demo) \
   --set region=us-east-1 \
-  --set vpcId=<vpc-id> \
-  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"= <IAM-role>    
+  --set vpcId=(vpc-id) \
+  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=(IAM-role)
 
 #replace with your clustername ,vpc id and iam role of loadbalancer(search in aws console iam-->roles-->search  AWSLoadBalancerControllerRole   copy the arn ) arn 
 
@@ -430,7 +431,7 @@ kubectl describe ingress e-commerce-ingress -n e-commerce   #this command option
 
 #remove old alb(application load balancer of path based and create a new alb for host based)
 
-kubectl delete ingress <ingress name> -n e-commerce   (example here: kubectl delete ingress e-commerce-ingress -n e-commerce)
+kubectl delete ingress ingress name -n e-commerce   (example here: kubectl delete ingress e-commerce-ingress -n e-commerce)
 
 
 kubectl apply -f hostbased-cart.yaml 
