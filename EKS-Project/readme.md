@@ -103,15 +103,15 @@ Verify:
 
 terraform -version
 
-##  **EKS Project Run Steps (Terraform)**
+# **EKS Project Run Steps (Terraform)**
 
-# **1.Clone the repository to local: create a empty directory in local .Then clone it**
+## **1.Clone the repository to local: create a empty directory in local .Then clone it**
 
 git clone https://github.com/harathi-mutyam/PRODUCTION-EKS.git
 
 cd PRODUCTION-EKS
 
-# **2. Go to Terraform working directory**
+## **2. Go to Terraform working directory**
 
 Based on your instructions:
 
@@ -119,7 +119,7 @@ cd eks-project/terraform/eks
 
 Make sure this folder contains: main.tf ,eks.tf,vpc.tf,provider.tf,dev.tfvars
 
-# **3. Configure AWS CLI (mandatory):** for that go to browser create a IAM user (eks-user) in aws console for this project save access key and secret keys locally
+## **3. Configure AWS CLI (mandatory):** for that go to browser create a IAM user (eks-user) in aws console for this project save access key and secret keys locally
 
 aws configure
 
@@ -130,7 +130,7 @@ Secret Key  : give your secret key
 Region → us-east-1
 json
 
-# **4. Create S3 backend bucket (if not already created)**
+## **4. Create S3 backend bucket (if not already created)**
 
 Through aws console or through command
 
@@ -162,7 +162,7 @@ if reguired change
 kubernetes_version        = "1.34" also
 
 
-# **5. Create EC2 Key Pair (VERY IMPORTANT)**
+## **5. Create EC2 Key Pair (VERY IMPORTANT)**
 
 Your project uses: check it in ec2.tf file which block you are using
 
@@ -173,37 +173,37 @@ So key MUST already exist in AWS.**(create manually through aws console)**
 If you use resource "aws_key_pair"
 Generate through ssh-keygen
 
-Step 1: Create local key
+### Step 1: Create local key
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/ec2_keypair
 
-Step 2: Import into AWS
+### Step 2: Import into AWS
 
 aws ec2 import-key-pair \
   --key-name ec2_keypair \
   --public-key-material fileb://~/.ssh/ec2_keypair.pub \
   --region us-east-1
   
-Step 3: Verify
+### Step 3: Verify
 
 aws ec2 describe-key-pairs --key-names ec2_keypair
 
-# **6. Initialize Terraform**
+## **6. Initialize Terraform**
 
 terraform init
 
 This will: download AWS provider ,initialize backend (S3) ,prepare modules
 
-# **7. Validate configuration**
+## **7. Validate configuration**
 
 terraform validate
 
-# **8. Plan infrastructure**
+## **8. Plan infrastructure**
 
 terraform plan -var-file="dev.tfvars"    #because all global configuration settings are defined in dev.tfvars. If you run only terraform plan, it will prompt you to enter values manually.”
 
 We use dev.tfvars with terraform plan so Terraform already knows all values. If we don’t use it, Terraform will stop and ask us to enter them one by one.
 
-# **9. Apply infrastructure**
+## **9. Apply infrastructure**
 
 terraform apply -var-file="dev.tfvars"
 
@@ -212,7 +212,7 @@ Type:yes
 After resource creation completes, verify in the AWS Console that the bastion server, cluster, and VPCs ,IAM Roles are available. The process usually takes 10–15 minutes. Then copy the bastion server’s public IP address and launch a new Git Bash session.
 
 
-# **10. Post Deployment (Bastion Access & Kubernetes Setup)**
+## **10. Post Deployment (Bastion Access & Kubernetes Setup)**
 
 Because cluster is private:SSH into Baston server 
 
@@ -221,7 +221,7 @@ ssh -i ~/.ssh/ec2_keypair ubuntu@bastion-public-ip
 
 (example: ssh -i Downloads/ec2_keypair.pem ubuntu@(bastion public_ip))
 
-#**Configure Kubernetes access**
+### **Configure Kubernetes access**
 
 aws configure    #enter here access keys and secret keys ,region and json
 
@@ -239,7 +239,7 @@ aws eks update-kubeconfig --region us-east-1 --name dev-eks-demo
 
 kubectl get nodes
 
-# **11. Install Helm (inside bastion)**
+## **11. Install Helm (inside bastion)**
 
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 
@@ -247,7 +247,7 @@ chmod 700 get_helm.sh
 
 ./get_helm.sh
 
-# **12. Install AWS Load Balancer Controller**
+## **12. Install AWS Load Balancer Controller**
 helm repo add eks https://aws.github.io/eks-charts
 helm repo update
 
@@ -260,9 +260,9 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set vpcId=(vpc-id) \
   --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=(IAM-role)
 
-#replace with your clustername ,vpc id and iam role of loadbalancer(search in aws console iam-->roles-->search  AWSLoadBalancerControllerRole   copy the arn ) arn 
+replace with your clustername ,vpc id and iam role of loadbalancer(search in aws console iam-->roles-->search  AWSLoadBalancerControllerRole   copy the arn ) arn 
 
-# **13. Clone your repository on the Bastion Server for microservices deployment**
+## **13. Clone your repository on the Bastion Server for microservices deployment**
 
 git clone "https://github.com/harathi-mutyam/PRODUCTION-EKS.git"
 
@@ -277,7 +277,7 @@ cd k8s
 
 kubectl get deployment -n kube-system
 
-# **14. Deploy Microservices for path based routing  or Set up microservices deployment with path-based routing.**
+## **14. Deploy Microservices for path based routing  or Set up microservices deployment with path-based routing.**
 
 kubectl apply -f ns.yaml
 kubectl apply -f product.yaml
@@ -288,13 +288,13 @@ vim path-ingress.yaml
 
 These configuration lines are used for HTTPS and SSL certificate setup, so they are commented out in path-ingress.yaml file 
 
-#alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
+alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
 
-#alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:071325923620:certificate/e6c8ab5f-3dcd-42b6-bbbb-2ff4e2b811fc
+alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:071325923620:certificate/e6c8ab5f-3dcd-42b6-bbbb-2ff4e2b811fc
 
-#alb.ingress.kubernetes.io/ssl-redirect: '443'
+alb.ingress.kubernetes.io/ssl-redirect: '443'
 
-16. Ingress Deployment (HTTP ALB)
+**Ingress Deployment (HTTP ALB)**
 
 kubectl apply -f path-ingress.yaml    #loadbalancer created now
 
@@ -311,9 +311,9 @@ http://(ALB-DNS)/cart   --->cart
 http://(ALB-DNS)/products   --->products
 
 
- # 14. **HTTPS Setup** (ACM + GoDaddy)  Enable TLS (HTTPS Setup)
+ ## 14. **HTTPS Setup** (ACM + GoDaddy)  Enable TLS (HTTPS Setup)
  
-**step 1: Request an acm certificate in aws console**
+### **step 1: Request an acm certificate in aws console**
 
 choose Request a public certificate  --> click on next --> Fully qualified domain name : your godaddy domainname (*.ehmutyam.xyz)
 
@@ -321,7 +321,7 @@ click on request
 
 Certificate Status --> Pending
 
-**step 2: Add DNS in GoDaddy**
+### **step 2: Add DNS in GoDaddy**
 
 Open godaddy.com  --> Domain -->DNS  ---> Add New Record  -->
 
@@ -334,9 +334,9 @@ value: Copy CNAME value from aws console (completly)  -->paste it here
 After completing the above steps, the certificate status in the AWS Console changes from Pending to Issued.
 
 
-# **15.Route53 Setup**
+## **15.Route53 Setup**
 
-**Create Route53 Hosted Zone**
+### **Create Route53 Hosted Zone**
 
 Go to AWS Console → Route53 --> Click Hosted Zones  -->  Click on Create Hosted Zone --->
 
@@ -357,7 +357,7 @@ ns-222.awsdns-34.co.uk
 
 copy ns records
 
-# **16. Update GoDaddy Nameservers**
+## **16. Update GoDaddy Nameservers**
 
 go to GoDaddy in browser:
 
@@ -383,7 +383,7 @@ Check ACM Region
 
 Make sure certificate is in:us-east-1 (N. Virginia) ✅ REQUIRED for ALB
 
-# **17. Enable HTTPS Ingress**
+## **17. Enable HTTPS Ingress**
 
 Now we will connect the AWS Load Balancer to Kubernetes. Open the path-ingress.yaml file, uncomment the following lines, and update the certificate ARN with your own value. After making the changes, save the file.
 
@@ -416,7 +416,7 @@ https://(ALB-DNS)/products   --->products
 
 Notes: ALB path-based routing  From your ALB rules: /product → product target group  ,/cart → cart target group ,/ → payments (default)
 
-# **18. Host-Based Routing Setup:**
+## **18. Host-Based Routing Setup:**
 
 vim hostbased-ingress.yaml  # replace acm certicate arn with your certificate arn
 
@@ -455,7 +455,7 @@ for debuggin if you got any isse use below commands check pods ,svc ,ingress and
 
 
 
-# **19. Connect Domain → ALB using Route 53**
+## **19. Connect Domain → ALB using Route 53**
 
 **Step 1: Open Hosted Zone**
 
@@ -496,7 +496,7 @@ https:product.ehmutyam.xyz → Product Service
 https:payments.ehmutyam.xyz → Payments Service
 
 
-# **20. Process of Deletion**
+## **20. Process of Deletion**
 
 **delete load balancer from baston server gitbash first**
 kubectl delete -f hostbased-ingress.yaml
@@ -508,7 +508,8 @@ run this command in vs code gitbash
 terraform destroy -var-file="dev.tfvars"
 
 
-**Note**: **Difference between path based and host based routing**
+
+# **Note**: **Difference between path based and host based routing**
 
 ## Why cart.yaml was modified (Path-based → Host-based Routing)
 🔹 **Path-Based Routing (Before)**
@@ -523,7 +524,7 @@ Application needed to serve content from:
 Health check:
 
 /cart/index.html
-🔹 Host-Based Routing (Now)
+## Host-Based Routing (Now)
 
 URL used:
 
@@ -541,10 +542,10 @@ Updated health check:
 /cart/index.html → /index.html
 🔹 Reason
 
-In host-based routing, traffic comes to the root path (/), not /cart.
-So the application must serve content from index.html instead of a subfolder.
+**In host-based routing, traffic comes to the root path (/), not /cart.
+So the application must serve content from index.html instead of a subfolder.**
 
-✅ Result
+# ✅ Result
 
 Application works correctly with:
 
