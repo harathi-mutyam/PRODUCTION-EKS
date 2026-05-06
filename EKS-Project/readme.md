@@ -305,11 +305,11 @@ kubectl get ingress -n e-commerce
 **ALB DNS name → k8s-default-xxxx.elb.amazonaws.com**
 
 **Test in browser:**
-
+```shell
 http://(ALB-DNS)    -->payments
 http://(ALB-DNS)/cart   --->cart
 http://(ALB-DNS)/products   --->products
-
+```
 
  ## 14. **HTTPS Setup** (ACM + GoDaddy)  Enable TLS (HTTPS Setup)
  
@@ -349,15 +349,12 @@ NS (Name Servers) → 4 values
 SOA record
 
 Example: 4 values of ns servers
-
+```shell
 ns-123.awsdns-45.org
-
 ns-456.awsdns-90.com
-
 ns-789.awsdns-12.net
-
 ns-222.awsdns-34.co.uk
-
+```
 copy ns records
 
 ## **16. Update GoDaddy Nameservers**
@@ -373,16 +370,13 @@ Custom Nameservers : select “I’ll use my own nameservers”
 
 Paste the 4 Route53 NS records without end . (remove last . from NSServers values)
 
-for example:
-
+**for example:**
+```shell
 ns-xxx.awsdns-xx.org
-
 ns-xxx.awsdns-xx.com
-
 ns-xxx.awsdns-xx.net
-
 ns-xxx.awsdns-xx.co.uk
-
+```
 Save
 
 Check ACM Region
@@ -408,17 +402,17 @@ alb.ingress.kubernetes.io/ssl-redirect: '443'
 kubectl apply -f path-ingress.yaml
 kubectl get ingress -n e-commerce
 ```
+```shell
 NAME                 CLASS   HOSTS   ADDRESS                                                                   PORTS   AGE
 e-commerce-ingress   alb     *       k8s-ecommerc-ecommerc-949981ca5a-1099050560.us-east-1.elb.amazonaws.com   80      32s
-
+```
 
 **Test it in browser for Path-Based Routing
+```shell
 https://(ALB-DNS)    -->payments**
-
 https://(ALB-DNS)/cart   --->cart  (https://k8s-ecommerc-ecommerc-949981ca5a-1471282601.us-east-1.elb.amazonaws.com/cart/)
-
 https://(ALB-DNS)/products   --->products
-
+```
 Notes: ALB path-based routing  From your ALB rules: /product → product target group  ,/cart → cart target group ,/ → payments (default)
 
 ## **18. Host-Based Routing Setup:**
