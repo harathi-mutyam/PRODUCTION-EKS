@@ -280,8 +280,11 @@ kubectl get deployment -n kube-system
 ## **14. Deploy Microservices for path based routing  or Set up microservices deployment with path-based routing.**
 
 kubectl apply -f ns.yaml
+
 kubectl apply -f product.yaml
+
 kubectl apply -f cart.yaml
+
 kubectl apply -f payments.yaml
 
 vim path-ingress.yaml
