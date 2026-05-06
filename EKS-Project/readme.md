@@ -452,7 +452,7 @@ kubectl delete ingress e-commerce-ingress -n e-commerce #syntax kubectl delete i
 kubectl apply -f hostbased-cart.yaml 
 kubectl apply -f hostbased-product.yaml
 kubectl apply -f payments.yaml    #payments.yaml is same for both path and host based because here we used /html/index.html but in cart and products we /prodcut/index.html , /cart/index.html for referece check it in another notes
-kubectl apply -f hostbased-ingressyaml
+kubectl apply -f hostbased-ingress.yaml
 ```
 
 for debuggin if you got any isse use below commands check pods ,svc ,ingress and roll out 
