@@ -300,7 +300,7 @@ kubectl apply -f payments.yaml
 vim path-ingress.yaml
 ```
 
-These configuration lines are used for HTTPS and SSL certificate setup, so they are commented out in path-ingress.yaml file 
+These configuration lines are used for HTTPS and SSL certificate setup, so comment 3 these lines in path-ingress.yaml file 
 ```shell
 alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
 alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:071325923620:certificate/e6c8ab5f-3dcd-42b6-bbbb-2ff4e2b811fc
@@ -314,6 +314,8 @@ kubectl get ingress -n e-commerce
 **You will see:**
 
 **ALB DNS name → k8s-default-xxxx.elb.amazonaws.com**
+
+Before test it in browsers check it in aws console-->ec2-->load balncer-->provisioning or active.If state changed to active test in browser with alb-dns name
 
 **Test in browser:**
 ```shell
