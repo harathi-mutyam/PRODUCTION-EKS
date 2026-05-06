@@ -143,7 +143,7 @@ bucket       = "backend-bucket-final-6526"   #create s3 bucket through aws conso
 Update the region based on your AWS region. in backend block 
 
 
-In dev.tfvars 
+### In dev.tfvars 
 
 Change Ami id of Ubuntu Server Based on region
 
