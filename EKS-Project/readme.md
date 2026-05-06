@@ -95,37 +95,37 @@ Install AWS CLI:
 choco install awscli -y
 ```
 Verify:
-
+```shell
 aws --version
-
+```
 # **3. Install Terraform using Chocolatey**
 
 Install Terraform:
-
+```shell
 choco install terraform -y
-
+```
 Verify:
-
+```shell
 terraform -version
-
+```
 # **EKS Project Run Steps (Terraform)**
 
 ## **1.Clone the repository to local: create a empty directory in local .Then clone it**
-
+```shell
 git clone https://github.com/harathi-mutyam/PRODUCTION-EKS.git
 
 cd PRODUCTION-EKS
-
+```
 ## **2. Go to Terraform working directory**
 
 Based on your instructions:
-
+```shell
 cd eks-project/terraform/eks
-
+```
 Make sure this folder contains: main.tf ,eks.tf,vpc.tf,provider.tf,dev.tfvars
 
 ## **3. Configure AWS CLI (mandatory):** for that go to browser create a IAM user (eks-user) in aws console for this project save access key and secret keys locally
-
+```shell
 aws configure
 
 Set:
@@ -134,12 +134,13 @@ AWS Access Key : give your access key
 Secret Key  : give your secret key
 Region → us-east-1
 json
-
+```
 ## **4. Create S3 backend bucket (if not already created)**
 
 Through aws console or through command
-
+```shell
 aws s3 mb s3://your-terraform-state-bucket --region us-east-1
+```
 
 in **backend.tf** change the bucket name 
 
@@ -179,55 +180,56 @@ If you use resource "aws_key_pair"
 Generate through ssh-keygen
 
 ### Step 1: Create local key
+```shell
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/ec2_keypair
-
+```
 ### Step 2: Import into AWS
-
+```shell
 aws ec2 import-key-pair \
   --key-name ec2_keypair \
   --public-key-material fileb://~/.ssh/ec2_keypair.pub \
   --region us-east-1
-  
+```  
 ### Step 3: Verify
-
+```shell
 aws ec2 describe-key-pairs --key-names ec2_keypair
-
+```  
 ## **6. Initialize Terraform**
-
+```shell
 terraform init
-
+```  
 This will: download AWS provider ,initialize backend (S3) ,prepare modules
 
 ## **7. Validate configuration**
-
+```shell
 terraform validate
-
+```
 ## **8. Plan infrastructure**
-
+```shell
 terraform plan -var-file="dev.tfvars"    #because all global configuration settings are defined in dev.tfvars. If you run only terraform plan, it will prompt you to enter values manually.”
-
+```
 We use dev.tfvars with terraform plan so Terraform already knows all values. If we don’t use it, Terraform will stop and ask us to enter them one by one.
 
 ## **9. Apply infrastructure**
-
+```shell
 terraform apply -var-file="dev.tfvars"
 
 Type:yes
-
+```
 After resource creation completes, verify in the AWS Console that the bastion server, cluster, and VPCs ,IAM Roles are available. The process usually takes 10–15 minutes. Then copy the bastion server’s public IP address and launch a new Git Bash session.
 
 
 ## **10. Post Deployment (Bastion Access & Kubernetes Setup)**
 
 Because cluster is private:SSH into Baston server 
-
+```shell
 ssh -i ~/.ssh/ec2_keypair ubuntu@bastion-public-ip
-
+```
 
 (example: ssh -i Downloads/ec2_keypair.pem ubuntu@(bastion public_ip))
 
 ### **Configure Kubernetes access**
-
+```shell
 aws configure    #enter here access keys and secret keys ,region and json
 
 AWS Access Key : give your saved access key
@@ -237,62 +239,56 @@ Secret Key  : give your saved secret key
 Region → us-east-1
 
 json
-
+```
+```shell
 aws eks update-kubeconfig --region us-east-1 --name dev-eks-demo
-
+```
 **Verify:**
-
+```shell
 kubectl get nodes
-
+```
 ## **11. Install Helm (inside bastion)**
-
+```shell
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-
 chmod 700 get_helm.sh
-
 ./get_helm.sh
+```
 
 ## **12. Install AWS Load Balancer Controller**
+```shell
 helm repo add eks https://aws.github.io/eks-charts
 helm repo update
-
+```
 Install:
-
+```shell
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
   --set clusterName=(dev-eks-demo) \
   --set region=us-east-1 \
   --set vpcId=(vpc-id) \
   --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=(IAM-role)
-
+```
 replace with your clustername ,vpc id and iam role of loadbalancer(search in aws console iam-->roles-->search  AWSLoadBalancerControllerRole   copy the arn ) arn 
 
 ## **13. Clone your repository on the Bastion Server for microservices deployment**
-
+```shell
 git clone "https://github.com/harathi-mutyam/PRODUCTION-EKS.git"
 
-
 cd PRODUCTION-EKS
-
 ls
-
 cd EKS-Project
-
 cd k8s
-
 kubectl get deployment -n kube-system
+```
 
 ## **14. Deploy Microservices for path based routing  or Set up microservices deployment with path-based routing.**
-
+```shell
 kubectl apply -f ns.yaml
-
 kubectl apply -f product.yaml
-
 kubectl apply -f cart.yaml
-
 kubectl apply -f payments.yaml
-
 vim path-ingress.yaml
+```
 
 These configuration lines are used for HTTPS and SSL certificate setup, so they are commented out in path-ingress.yaml file 
 
