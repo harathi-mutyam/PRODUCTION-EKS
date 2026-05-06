@@ -614,13 +614,13 @@ Update your Kubernetes hostbased-ingress.yaml:  <ACM-ARN>  #replace with your ce
 ```
 
 ### create CNAME records in godaddy.com for https purpose 
-
+```shell
 type: CNAME Name: cart Data: alb DNS name 
 
 type: CNAME Name: product Data: alb DNS name 
 
 type: CNAME Name: payments Data: alb DNS name 
-
+```
 Example:
 
 k8s-ecommerc-xxxxx.us-east-1.elb.amazonaws.com
