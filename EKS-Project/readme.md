@@ -373,8 +373,11 @@ Paste the 4 Route53 NS records without end . (remove last . from NSServers value
 for example:
 
 ns-xxx.awsdns-xx.org
+
 ns-xxx.awsdns-xx.com
+
 ns-xxx.awsdns-xx.net
+
 ns-xxx.awsdns-xx.co.uk
 
 Save
