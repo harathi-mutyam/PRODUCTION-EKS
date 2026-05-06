@@ -274,10 +274,15 @@ replace with your clustername ,vpc id and iam role of loadbalancer(search in aws
 ```shell
 git clone "https://github.com/harathi-mutyam/PRODUCTION-EKS.git"
 cd PRODUCTION-EKS
+
 ls
+
 cd EKS-Project
+
 cd k8s
+
 kubectl get deployment -n kube-system
+
 ```
 
 ## **14. Deploy Microservices for path based routing  or Set up microservices deployment with path-based routing.**
