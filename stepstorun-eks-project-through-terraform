@@ -119,7 +119,7 @@ Verify:
 git clone "https://github.com/harathi-mutyam/PRODUCTION-EKS.git"
 
 
-cd cd PRODUCTION-EKS
+cd PRODUCTION-EKS
 
 ls
 
