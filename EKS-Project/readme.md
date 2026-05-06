@@ -136,7 +136,7 @@ Through aws console or through command
 
 aws s3 mb s3://your-terraform-state-bucket --region us-east-1
 
-in backend.tf change the bucket name 
+in **backend.tf** change the bucket name 
 
 bucket       = "backend-bucket-final-6526"   #create s3 bucket through aws console .and replace bucket name here
 
