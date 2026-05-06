@@ -108,6 +108,7 @@ terraform -version
 **1.Clone the repository to local: create a empty directory in local .Then clone it**
 
 git clone https://github.com/harathi-mutyam/PRODUCTION-EKS.git
+
 cd PRODUCTION-EKS
 
 **2. Go to Terraform working directory**
@@ -130,11 +131,13 @@ Region → us-east-1
 json
 
 **4. Create S3 backend bucket (if not already created)**
+
 Through aws console or through command
 
 aws s3 mb s3://your-terraform-state-bucket --region us-east-1
 
 in backend.tf change the bucket name 
+
 bucket       = "backend-bucket-final-6526"   #create s3 bucket through aws console .and replace bucket name here
 
 Update the region based on your AWS region. in backend block 
@@ -143,6 +146,7 @@ Update the region based on your AWS region. in backend block
 In dev.tfvars 
 
 Change Ami id of Ubuntu Server Based on region
+
 ami_id        = "ami-091138d0f0d41ff90"  #replace with your ubuntu ami id based on region
 
 Instance type based on your project size
@@ -171,7 +175,9 @@ Generate through ssh-keygen
 
 Step 1: Create local key
 ssh-keygen -t rsa -b 4096 -f ~/.ssh/ec2_keypair
+
 Step 2: Import into AWS
+
 aws ec2 import-key-pair \
   --key-name ec2_keypair \
   --public-key-material fileb://~/.ssh/ec2_keypair.pub \
@@ -190,6 +196,7 @@ This will: download AWS provider ,initialize backend (S3) ,prepare modules
 terraform validate
 
 **8. Plan infrastructure**
+
 terraform plan -var-file="dev.tfvars"    #because all global configuration settings are defined in dev.tfvars. If you run only terraform plan, it will prompt you to enter values manually.”
 
 We use dev.tfvars with terraform plan so Terraform already knows all values. If we don’t use it, Terraform will stop and ask us to enter them one by one.
@@ -197,6 +204,7 @@ We use dev.tfvars with terraform plan so Terraform already knows all values. If 
 **9. Apply infrastructure**
 
 terraform apply -var-file="dev.tfvars"
+
 Type:yes
 
 After resource creation completes, verify in the AWS Console that the bastion server, cluster, and VPCs ,IAM Roles are available. The process usually takes 10–15 minutes. Then copy the bastion server’s public IP address and launch a new Git Bash session.
@@ -215,8 +223,11 @@ ssh -i ~/.ssh/ec2_keypair ubuntu@<bastion-public-ip>
 aws configure    #enter here access keys and secret keys ,region and json
 
 AWS Access Key : give your saved access key
+
 Secret Key  : give your saved secret key
+
 Region → us-east-1
+
 json
 
 aws eks update-kubeconfig --region us-east-1 --name dev-eks-demo
@@ -374,7 +385,7 @@ open path-ingress.yaml file
 uncomment the following lines 
 
 alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
-alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:071325923620:certificate/e6c8ab5f-3dcd-42b6-bbbb-2ff4e2b811fc     #Replace the certificate ARN with your own from AWS Certificate Manager
+alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:071325923620:certificate/e6c8ab5f-3dcd-42b6-bbbb-2ff4e2b811fc    #Replace the certificate ARN with your own from AWS Certificate Manager
 alb.ingress.kubernetes.io/ssl-redirect: '443'
 
 save the file  :wq!
