@@ -569,6 +569,20 @@ http://cart.ehmutyam.xyz
 No 404 errors
 ALB health checks pass successfully
 
+Add 
+# GoDaddy is only: domain registrar
+
+You either:
+
+Option A:
+**point NS records to Route53**
+
+OR
+
+Option B:
+**directly add CNAME records**
+
+
 # Other way to add CNAME Records in godaddy instead of ns records follow the below procedure
 
 use default ns records of godaddy.com 
