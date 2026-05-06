@@ -409,3 +409,4 @@ run this command in vs code gitbash
 Destroy Infrastructure (Cleanup)
 
 terraform destroy -var-file="dev.tfvars"
+
