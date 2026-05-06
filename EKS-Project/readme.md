@@ -206,7 +206,9 @@ After resource creation completes, verify in the AWS Console that the bastion se
 
 Because cluster is private:SSH into Baston server 
 
-ssh -i ~/.ssh/ec2_keypair ubuntu@<bastion-public-ip>   (example: ssh -i Downloads/ec2_keypair.pem ubuntu@<bastion public_ip>)
+ssh -i ~/.ssh/ec2_keypair ubuntu@<bastion-public-ip>   
+
+(example: ssh -i Downloads/ec2_keypair.pem ubuntu@<bastion public_ip>)
 
 **Configure Kubernetes access**
 
