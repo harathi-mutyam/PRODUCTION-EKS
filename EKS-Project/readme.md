@@ -354,8 +354,11 @@ SOA record
 Example: 4 values of ns servers
 
 ns-123.awsdns-45.org
+
 ns-456.awsdns-90.com
+
 ns-789.awsdns-12.net
+
 ns-222.awsdns-34.co.uk
 
 copy ns records
