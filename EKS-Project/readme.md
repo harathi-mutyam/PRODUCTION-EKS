@@ -268,10 +268,10 @@ Install:
 ```shell
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
-  --set clusterName=**(dev-eks-demo)** \
+  --set clusterName=(dev-eks-demo) \
   --set region=us-east-1 \
-  --set vpcId=**(vpc-id)** \
-  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=**(IAM-role-arn)**
+  --set vpcId=(vpc-id) \
+  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=(IAM-role-arn)
 ```
 
 replace with your clustername ,vpc id and iam role of loadbalancer(search in aws console iam-->roles-->search  AWSLoadBalancerControllerRole   copy the arn ) arn and remove () also
