@@ -69,11 +69,11 @@ Used for:
 - Helm installation
 - Controller installation
 
-**Prerequisites Setup for This Repository (AWS CLI + Terraform via Chocolatey)**
+# **Prerequisites Setup for This Repository (AWS CLI + Terraform via Chocolatey)**
 
 Before running this EKS Terraform project, install the required tools on your system using Chocolatey.
 
-⚙️ **1. Install Chocolatey (if not already installed)**
+# **1. Install Chocolatey (if not already installed)**
 
 Open PowerShell as Administrator and install Chocolatey:
 
@@ -83,7 +83,7 @@ Verify installation:
 
 choco -v
 
-**2. Install AWS CLI using Chocolatey**
+# **2. Install AWS CLI using Chocolatey**
 
 Install AWS CLI:
 
@@ -93,7 +93,7 @@ Verify:
 
 aws --version
 
-**3. Install Terraform using Chocolatey**
+# **3. Install Terraform using Chocolatey**
 
 Install Terraform:
 
@@ -103,15 +103,15 @@ Verify:
 
 terraform -version
 
-**EKS Project Run Steps (Terraform)**
+##  **EKS Project Run Steps (Terraform)**
 
-**1.Clone the repository to local: create a empty directory in local .Then clone it**
+# **1.Clone the repository to local: create a empty directory in local .Then clone it**
 
 git clone https://github.com/harathi-mutyam/PRODUCTION-EKS.git
 
 cd PRODUCTION-EKS
 
-**2. Go to Terraform working directory**
+# **2. Go to Terraform working directory**
 
 Based on your instructions:
 
@@ -119,7 +119,7 @@ cd eks-project/terraform/eks
 
 Make sure this folder contains: main.tf ,eks.tf,vpc.tf,provider.tf,dev.tfvars
 
-**3. Configure AWS CLI (mandatory):** for that go to browser create a IAM user (eks-user) in aws console for this project save access key and secret keys locally
+# **3. Configure AWS CLI (mandatory):** for that go to browser create a IAM user (eks-user) in aws console for this project save access key and secret keys locally
 
 aws configure
 
@@ -130,7 +130,7 @@ Secret Key  : give your secret key
 Region → us-east-1
 json
 
-**4. Create S3 backend bucket (if not already created)**
+# **4. Create S3 backend bucket (if not already created)**
 
 Through aws console or through command
 
@@ -162,7 +162,7 @@ if reguired change
 kubernetes_version        = "1.34" also
 
 
-**5. Create EC2 Key Pair (VERY IMPORTANT)**
+# **5. Create EC2 Key Pair (VERY IMPORTANT)**
 
 Your project uses: check it in ec2.tf file which block you are using
 
@@ -187,23 +187,23 @@ Step 3: Verify
 
 aws ec2 describe-key-pairs --key-names ec2_keypair
 
-**6. Initialize Terraform**
+# **6. Initialize Terraform**
 
 terraform init
 
 This will: download AWS provider ,initialize backend (S3) ,prepare modules
 
-**7. Validate configuration**
+# **7. Validate configuration**
 
 terraform validate
 
-**8. Plan infrastructure**
+# **8. Plan infrastructure**
 
 terraform plan -var-file="dev.tfvars"    #because all global configuration settings are defined in dev.tfvars. If you run only terraform plan, it will prompt you to enter values manually.”
 
 We use dev.tfvars with terraform plan so Terraform already knows all values. If we don’t use it, Terraform will stop and ask us to enter them one by one.
 
-**9. Apply infrastructure**
+# **9. Apply infrastructure**
 
 terraform apply -var-file="dev.tfvars"
 
@@ -212,7 +212,7 @@ Type:yes
 After resource creation completes, verify in the AWS Console that the bastion server, cluster, and VPCs ,IAM Roles are available. The process usually takes 10–15 minutes. Then copy the bastion server’s public IP address and launch a new Git Bash session.
 
 
-**10. Post Deployment (Bastion Access & Kubernetes Setup)**
+# **10. Post Deployment (Bastion Access & Kubernetes Setup)**
 
 Because cluster is private:SSH into Baston server 
 
@@ -221,7 +221,7 @@ ssh -i ~/.ssh/ec2_keypair ubuntu@bastion-public-ip
 
 (example: ssh -i Downloads/ec2_keypair.pem ubuntu@(bastion public_ip))
 
-**Configure Kubernetes access**
+#**Configure Kubernetes access**
 
 aws configure    #enter here access keys and secret keys ,region and json
 
@@ -239,7 +239,7 @@ aws eks update-kubeconfig --region us-east-1 --name dev-eks-demo
 
 kubectl get nodes
 
-**11. Install Helm (inside bastion)**
+# **11. Install Helm (inside bastion)**
 
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 
@@ -247,7 +247,7 @@ chmod 700 get_helm.sh
 
 ./get_helm.sh
 
-**12. Install AWS Load Balancer Controller**
+# **12. Install AWS Load Balancer Controller**
 helm repo add eks https://aws.github.io/eks-charts
 helm repo update
 
@@ -262,7 +262,7 @@ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
 
 #replace with your clustername ,vpc id and iam role of loadbalancer(search in aws console iam-->roles-->search  AWSLoadBalancerControllerRole   copy the arn ) arn 
 
-**13. Clone your repository on the Bastion Server for microservices deployment**
+# **13. Clone your repository on the Bastion Server for microservices deployment**
 
 git clone "https://github.com/harathi-mutyam/PRODUCTION-EKS.git"
 
@@ -277,7 +277,7 @@ cd k8s
 
 kubectl get deployment -n kube-system
 
-**14. Deploy Microservices for path based routing  or Set up microservices deployment with path-based routing.**
+# **14. Deploy Microservices for path based routing  or Set up microservices deployment with path-based routing.**
 
 kubectl apply -f ns.yaml
 kubectl apply -f product.yaml
@@ -311,7 +311,7 @@ http://(ALB-DNS)/cart   --->cart
 http://(ALB-DNS)/products   --->products
 
 
- 14. **HTTPS Setup** (ACM + GoDaddy)  Enable TLS (HTTPS Setup)
+ # 14. **HTTPS Setup** (ACM + GoDaddy)  Enable TLS (HTTPS Setup)
  
 **step 1: Request an acm certificate in aws console**
 
@@ -334,7 +334,7 @@ value: Copy CNAME value from aws console (completly)  -->paste it here
 After completing the above steps, the certificate status in the AWS Console changes from Pending to Issued.
 
 
-**15.Route53 Setup**
+# **15.Route53 Setup**
 
 **Create Route53 Hosted Zone**
 
@@ -357,7 +357,7 @@ ns-222.awsdns-34.co.uk
 
 copy ns records
 
-**16. Update GoDaddy Nameservers**
+# **16. Update GoDaddy Nameservers**
 
 go to GoDaddy in browser:
 
@@ -383,7 +383,7 @@ Check ACM Region
 
 Make sure certificate is in:us-east-1 (N. Virginia) ✅ REQUIRED for ALB
 
-**17. Enable HTTPS Ingress**
+# **17. Enable HTTPS Ingress**
 
 Now we will connect the AWS Load Balancer to Kubernetes. Open the path-ingress.yaml file, uncomment the following lines, and update the certificate ARN with your own value. After making the changes, save the file.
 
@@ -416,7 +416,7 @@ https://(ALB-DNS)/products   --->products
 
 Notes: ALB path-based routing  From your ALB rules: /product → product target group  ,/cart → cart target group ,/ → payments (default)
 
-**18. Host-Based Routing Setup:**
+# **18. Host-Based Routing Setup:**
 
 vim hostbased-ingress.yaml  # replace acm certicate arn with your certificate arn
 
@@ -445,13 +445,13 @@ kubectl apply -f hostbased-ingressyaml
 
 for debuggin if you got any isse use below commands check pods ,svc ,ingress and roll out 
 
-# kubectl rollout restart deployment -n e-commerce
+#kubectl rollout restart deployment -n e-commerce
 
-# kubectl get pods -n e-commerce
+#kubectl get pods -n e-commerce
 
-# kubectl get svc -n e-commerce
+#kubectl get svc -n e-commerce
 
-# kubectl get ingress -n e-commerce
+#kubectl get ingress -n e-commerce
 
 
 
