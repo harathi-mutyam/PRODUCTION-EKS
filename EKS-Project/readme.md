@@ -615,11 +615,11 @@ Update your Kubernetes hostbased-ingress.yaml:  <ACM-ARN>  #replace with your ce
 
 ### create CNAME records in godaddy.com for https purpose 
 ```shell
-type: CNAME Name: cart Data: alb DNS name 
+type: CNAME       Name: cart          Data: alb DNS name 
 
-type: CNAME Name: product Data: alb DNS name 
+type: CNAME       Name: product       Data: alb DNS name 
 
-type: CNAME Name: payments Data: alb DNS name 
+type: CNAME       Name: payments      Data: alb DNS name 
 ```
 Example:
 
@@ -633,11 +633,11 @@ First check DNS:
 nslookup cart.ehmutyam.xyz
 
 Then open:
-
+```shell
 https://cart.ehmutyam.xyz
 https://product.ehmutyam.xyz
 https://payments.ehmutyam.xyz
-
+```
 
 
 
