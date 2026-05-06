@@ -120,7 +120,12 @@ cd PRODUCTION-EKS
 
 Based on your instructions:
 ```shell
-cd eks-project/terraform/eks
+ls
+cd eks-project
+ls
+cd terraform
+ls
+cd eks
 ```
 Make sure this folder contains: main.tf ,eks.tf,vpc.tf,provider.tf,dev.tfvars
 
