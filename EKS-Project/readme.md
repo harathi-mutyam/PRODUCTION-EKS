@@ -569,4 +569,124 @@ http://cart.ehmutyam.xyz
 No 404 errors
 ALB health checks pass successfully
 
+# Other way to add CNAMe Records in godaddy instead of ns records follow the below procedure
+
+use default ns records of godaddy.com
+## Step 1: first create a acm certificate in aws console 
+
+later add cname name  and cname value of a certificate in godaddy.com 
+then the certificate is valid
+
+
+
+## STEP 2 — Create SSL Certificate (ACM)
+
+In Amazon Certificate Manager:
+
+Request certificate:
+
+*.ehmutyam.xyz
+
+Choose: DNS validation
+
+It will give CNAME records → add them in GoDaddy
+
+Wait until status: ISSUED
+
+
+
+
+## STEP 3 — Configure ALB Ingress (VERY IMPORTANT)
+
+Update your Kubernetes hostbased-ingress.yaml:
+
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/certificate-arn: <ACM-ARN>  #replace with your certificate ARN
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+
+## STEP 4 — Host-based routing rules
+spec:
+  rules:
+  - host: cart.ehmutyam.xyz
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: cart-service
+            port:
+              number: 80
+
+  - host: product.ehmutyam.xyz
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: product-service
+            port:
+              number: 80
+
+  - host: payments.ehmutyam.xyz
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: payments-service
+            port:
+              number: 80
+
+Apply:
+
+ kubectl apply -f ns.yaml
+ kubectl apply -f  hostbased-cart.yaml
+ kubectl apply -f hostbased-product.yaml
+ kubectl apply -f payments.yaml
+ kubectl apply -f hostbased-ingress.yaml   
+ kubectl get ingress -n e-commerce  #copy the alb DNS name
+
+
+### create CNAME records in godaddy.com for https purpose 
+
+type: CNAME Name: cart Data: alb DNS name 
+
+type: CNAME Name: product Data: alb DNS name 
+
+type: CNAME Name: payments Data: alb DNS name 
+
+Example:
+
+k8s-ecommerc-xxxxx.us-east-1.elb.amazonaws.com
+
+
+Fix DNS (KEEP GoDaddy, no NS)
+
+In GoDaddy:
+
+👉 DELETE ALL NS records if you have added in the first process
+
+⚠️ No NS records needed at all.
+
+
+## STEP 5 — Test flow
+
+First check DNS:
+
+nslookup cart.ehmutyam.xyz
+
+Then open:
+
+https://cart.ehmutyam.xyz
+https://product.ehmutyam.xyz
+https://payments.ehmutyam.xyz
+
+
+
 
