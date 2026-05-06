@@ -288,7 +288,9 @@ vim path-ingress.yaml
 These configuration lines are used for HTTPS and SSL certificate setup, so they are commented out in path-ingress.yaml file 
 
 #alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
+
 #alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:071325923620:certificate/e6c8ab5f-3dcd-42b6-bbbb-2ff4e2b811fc
+
 #alb.ingress.kubernetes.io/ssl-redirect: '443'
 
 16. Ingress Deployment (HTTP ALB)
@@ -389,7 +391,9 @@ open path-ingress.yaml file
 uncomment the following lines 
 
 alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
+
 alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:071325923620:certificate/e6c8ab5f-3dcd-42b6-bbbb-2ff4e2b811fc    #Replace the certificate ARN with your own from AWS Certificate Manager
+
 alb.ingress.kubernetes.io/ssl-redirect: '443'
 
 save the file  :wq!
@@ -404,7 +408,9 @@ e-commerce-ingress   alb     *       k8s-ecommerc-ecommerc-949981ca5a-1099050560
 
 **Test it in browser for Path-Based Routing
 https://<ALB-DNS>    -->payments**
+
 https://<ALB-DNS>/cart   --->cart  (https://k8s-ecommerc-ecommerc-949981ca5a-1471282601.us-east-1.elb.amazonaws.com/cart/)
+
 https://<ALB-DNS>/products   --->products
 
 Notes: ALB path-based routing  From your ALB rules: /product → product target group  ,/cart → cart target group ,/ → payments (default)
