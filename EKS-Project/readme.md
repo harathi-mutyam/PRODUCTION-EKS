@@ -408,11 +408,11 @@ e-commerce-ingress   alb     *       k8s-ecommerc-ecommerc-949981ca5a-1099050560
 
 
 **Test it in browser for Path-Based Routing
-https://<ALB-DNS>    -->payments**
+https://(ALB-DNS)    -->payments**
 
-https://<ALB-DNS>/cart   --->cart  (https://k8s-ecommerc-ecommerc-949981ca5a-1471282601.us-east-1.elb.amazonaws.com/cart/)
+https://(ALB-DNS)/cart   --->cart  (https://k8s-ecommerc-ecommerc-949981ca5a-1471282601.us-east-1.elb.amazonaws.com/cart/)
 
-https://<ALB-DNS>/products   --->products
+https://(ALB-DNS)/products   --->products
 
 Notes: ALB path-based routing  From your ALB rules: /product → product target group  ,/cart → cart target group ,/ → payments (default)
 
