@@ -455,7 +455,7 @@ for debuggin if you got any isse use below commands check pods ,svc ,ingress and
 
 
 
-**19. Connect Domain → ALB using Route 53**
+# **19. Connect Domain → ALB using Route 53**
 
 **Step 1: Open Hosted Zone**
 
@@ -496,7 +496,7 @@ https:product.ehmutyam.xyz → Product Service
 https:payments.ehmutyam.xyz → Payments Service
 
 
-**20. Process of Deletion**
+# **20. Process of Deletion**
 
 **delete load balancer from baston server gitbash first**
 kubectl delete -f hostbased-ingress.yaml
