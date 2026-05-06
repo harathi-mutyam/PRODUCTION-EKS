@@ -444,7 +444,7 @@ kubectl describe ingress e-commerce-ingress -n e-commerce   #this command option
 ```
 #remove old alb(application load balancer of path based and create a new alb for host based)
 ```shell
-kubectl delete ingress ingress name -n e-commerce   (example here: kubectl delete ingress e-commerce-ingress -n e-commerce)
+kubectl delete ingress **(ingress name)** -n e-commerce   (example here: kubectl delete ingress e-commerce-ingress -n e-commerce)
 ```
 ```shell
 kubectl apply -f hostbased-cart.yaml 
