@@ -604,13 +604,14 @@ Update your Kubernetes hostbased-ingress.yaml:  <ACM-ARN>  #replace with your ce
 
 ### Apply:
 
+```shell
  kubectl apply -f ns.yaml
  kubectl apply -f  hostbased-cart.yaml
  kubectl apply -f hostbased-product.yaml
  kubectl apply -f payments.yaml
  kubectl apply -f hostbased-ingress.yaml   
  kubectl get ingress -n e-commerce  #copy the alb DNS name
-
+```
 
 ### create CNAME records in godaddy.com for https purpose 
 
