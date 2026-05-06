@@ -268,10 +268,10 @@ Install:
 ```shell
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
-  --set clusterName=(dev-eks-demo) \
+  --set clusterName=`<dev-eks-demo>` \
   --set region=us-east-1 \
-  --set vpcId=(vpc-id) \
-  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=(IAM-role)
+  --set vpcId=`<vpc-id>` \
+  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=`<IAM-role)>`
 ```
 replace with your clustername ,vpc id and iam role of loadbalancer(search in aws console iam-->roles-->search  AWSLoadBalancerControllerRole   copy the arn ) arn 
 
@@ -279,11 +279,8 @@ replace with your clustername ,vpc id and iam role of loadbalancer(search in aws
 ```shell
 git clone "https://github.com/harathi-mutyam/PRODUCTION-EKS.git"
 cd PRODUCTION-EKS
-
 ls
-
 cd EKS-Project
-
 cd k8s
 
 kubectl get deployment -n kube-system
@@ -316,9 +313,9 @@ kubectl get ingress -n e-commerce
 
 **Test in browser:**
 ```shell
-http://(ALB-DNS)    -->payments
-http://(ALB-DNS)/cart   --->cart
-http://(ALB-DNS)/products   --->products
+http://`<ALB-DNS>`    -->payments
+http://`<ALB-DNS>`/cart   --->cart
+http://`<ALB-DNS>`/products   --->products
 ```
 
  ## 14. **HTTPS Setup** (ACM + GoDaddy)  Enable TLS (HTTPS Setup)
