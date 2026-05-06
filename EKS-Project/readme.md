@@ -273,7 +273,6 @@ replace with your clustername ,vpc id and iam role of loadbalancer(search in aws
 ## **13. Clone your repository on the Bastion Server for microservices deployment**
 ```shell
 git clone "https://github.com/harathi-mutyam/PRODUCTION-EKS.git"
-
 cd PRODUCTION-EKS
 ls
 cd EKS-Project
@@ -291,19 +290,16 @@ vim path-ingress.yaml
 ```
 
 These configuration lines are used for HTTPS and SSL certificate setup, so they are commented out in path-ingress.yaml file 
-
+```shell
 alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
-
 alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:071325923620:certificate/e6c8ab5f-3dcd-42b6-bbbb-2ff4e2b811fc
-
 alb.ingress.kubernetes.io/ssl-redirect: '443'
-
+```
 **Ingress Deployment (HTTP ALB)**
-
+```shell
 kubectl apply -f path-ingress.yaml    #loadbalancer created now
-
 kubectl get ingress -n e-commerce
-
+```
 **You will see:**
 
 **ALB DNS name → k8s-default-xxxx.elb.amazonaws.com**
@@ -398,21 +394,20 @@ Make sure certificate is in:us-east-1 (N. Virginia) ✅ REQUIRED for ALB
 Now we will connect the AWS Load Balancer to Kubernetes. Open the path-ingress.yaml file, uncomment the following lines, and update the certificate ARN with your own value. After making the changes, save the file.
 
 open path-ingress.yaml file
-
-uncomment the following lines 
-
+```shell
+vim path-ingress.yaml
+```
+**uncomment the following lines** 
+```shell
 alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}, {"HTTP": 80}]'
-
 alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:071325923620:certificate/e6c8ab5f-3dcd-42b6-bbbb-2ff4e2b811fc    #Replace the certificate ARN with your own from AWS Certificate Manager
-
 alb.ingress.kubernetes.io/ssl-redirect: '443'
-
-save the file  :wq!
-
+```
+**save the file  :wq!**
+```shell
 kubectl apply -f path-ingress.yaml
-
 kubectl get ingress -n e-commerce
-
+```
 NAME                 CLASS   HOSTS   ADDRESS                                                                   PORTS   AGE
 e-commerce-ingress   alb     *       k8s-ecommerc-ecommerc-949981ca5a-1099050560.us-east-1.elb.amazonaws.com   80      32s
 
@@ -427,31 +422,29 @@ https://(ALB-DNS)/products   --->products
 Notes: ALB path-based routing  From your ALB rules: /product → product target group  ,/cart → cart target group ,/ → payments (default)
 
 ## **18. Host-Based Routing Setup:**
-
+```shell
 vim hostbased-ingress.yaml  # replace acm certicate arn with your certificate arn
-
 kubectl get ingress  -n e-commerce
+```
 
 You will see:
-
+```shell
 NAME                     HOSTS   ADDRESS
 e-commerce-ingress    cart.ehmuyam.xyz,..     abc123.us-east-1.elb.amazonaws.com
-
+```
+```shell
 kubectl describe ingress e-commerce-ingress -n e-commerce   #this command optional
-
+```
 #remove old alb(application load balancer of path based and create a new alb for host based)
-
+```shell
 kubectl delete ingress ingress name -n e-commerce   (example here: kubectl delete ingress e-commerce-ingress -n e-commerce)
-
-
+```
+```shell
 kubectl apply -f hostbased-cart.yaml 
-
 kubectl apply -f hostbased-product.yaml
-
 kubectl apply -f payments.yaml    #payments.yaml is same for both path and host based because here we used /html/index.html but in cart and products we /prodcut/index.html , /cart/index.html for referece check it in another notes
-
 kubectl apply -f hostbased-ingressyaml
-
+```
 
 for debuggin if you got any isse use below commands check pods ,svc ,ingress and roll out 
 
@@ -509,14 +502,15 @@ https:payments.ehmutyam.xyz → Payments Service
 ## **20. Process of Deletion**
 
 **delete load balancer from baston server gitbash first**
+```shell
 kubectl delete -f hostbased-ingress.yaml
-
+```
 run this command in vs code gitbash
 
 **Destroy Infrastructure (Cleanup)**
-
+```shell
 terraform destroy -var-file="dev.tfvars"
-
+```
 
 
 # **Note**: **Difference between path based and host based routing**
