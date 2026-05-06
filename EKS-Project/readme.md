@@ -182,7 +182,9 @@ aws ec2 import-key-pair \
   --key-name ec2_keypair \
   --public-key-material fileb://~/.ssh/ec2_keypair.pub \
   --region us-east-1
+  
 Step 3: Verify
+
 aws ec2 describe-key-pairs --key-names ec2_keypair
 
 **6. Initialize Terraform**
@@ -239,7 +241,9 @@ kubectl get nodes
 **11. Install Helm (inside bastion)**
 
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+
 chmod 700 get_helm.sh
+
 ./get_helm.sh
 
 **12. Install AWS Load Balancer Controller**
@@ -433,6 +437,7 @@ kubectl apply -f hostbased-ingressyaml
 
 
 for debuggin if you got any isse use below commands check pods ,svc ,ingress and roll out 
+
 # kubectl rollout restart deployment -n e-commerce
 
 # kubectl get pods -n e-commerce
@@ -446,6 +451,7 @@ for debuggin if you got any isse use below commands check pods ,svc ,ingress and
 **19. Connect Domain → ALB using Route 53**
 
 **Step 1: Open Hosted Zone**
+
 Now go to Route53--> Hosted Zone → ehmutyam.xyz
 
 **Step 2: Create A Records (Alias → ALB)**
