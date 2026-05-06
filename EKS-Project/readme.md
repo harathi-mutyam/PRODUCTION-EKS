@@ -525,51 +525,7 @@ terraform destroy -var-file="dev.tfvars"
 ```
 
 
-# **Note**: **Difference between path based and host based routing**
 
-## Why cart.yaml was modified (Path-based → Host-based Routing)
-🔹 **Path-Based Routing (Before)**
-URL used:
-
-http://(ALB-DNS)/cart
-
-Application needed to serve content from:
-
-/cart/index.html
-
-Health check:
-
-/cart/index.html
-## Host-Based Routing (Now)
-
-URL used:
-
-http://cart.ehmutyam.xyz
-No /cart path in URL ❌
-Request goes directly to root / ✅
-🔹 Changes Made
-
-Moved file from:
-
-/cart/index.html → /index.html
-
-Updated health check:
-
-/cart/index.html → /index.html
-🔹 Reason
-
-**In host-based routing, traffic comes to the root path (/), not /cart.
-So the application must serve content from index.html instead of a subfolder.**
-
-# ✅ Result
-
-Application works correctly with:
-
-http://cart.ehmutyam.xyz
-No 404 errors
-ALB health checks pass successfully
-
-Add 
 # GoDaddy is only: domain registrar
 
 You either:
@@ -652,6 +608,52 @@ https://cart.ehmutyam.xyz
 https://product.ehmutyam.xyz
 https://payments.ehmutyam.xyz
 ```
+
+# **Note**: **Difference between path based and host based routing**
+
+## Why cart.yaml was modified (Path-based → Host-based Routing)
+🔹 **Path-Based Routing (Before)**
+URL used:
+
+http://(ALB-DNS)/cart
+
+Application needed to serve content from:
+
+/cart/index.html
+
+Health check:
+
+/cart/index.html
+## Host-Based Routing (Now)
+
+URL used:
+
+http://cart.ehmutyam.xyz
+No /cart path in URL ❌
+Request goes directly to root / ✅
+🔹 Changes Made
+
+Moved file from:
+
+/cart/index.html → /index.html
+
+Updated health check:
+
+/cart/index.html → /index.html
+🔹 Reason
+
+**In host-based routing, traffic comes to the root path (/), not /cart.
+So the application must serve content from index.html instead of a subfolder.**
+
+# ✅ Result
+
+Application works correctly with:
+
+http://cart.ehmutyam.xyz
+No 404 errors
+ALB health checks pass successfully
+
+Add 
 
 
 
