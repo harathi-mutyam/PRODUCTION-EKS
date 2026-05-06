@@ -91,9 +91,9 @@ choco -v
 # **2. Install AWS CLI using Chocolatey**
 
 Install AWS CLI:
-
+```shell
 choco install awscli -y
-
+```
 Verify:
 
 aws --version
