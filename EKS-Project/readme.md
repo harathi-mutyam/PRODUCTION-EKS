@@ -569,81 +569,40 @@ http://cart.ehmutyam.xyz
 No 404 errors
 ALB health checks pass successfully
 
-# Other way to add CNAMe Records in godaddy instead of ns records follow the below procedure
+# Other way to add CNAME Records in godaddy instead of ns records follow the below procedure
 
-use default ns records of godaddy.com
-## Step 1: first create a acm certificate in aws console 
+use default ns records of godaddy.com 
 
-later add cname name  and cname value of a certificate in godaddy.com 
-then the certificate is valid
+👉 DELETE ALL NS records if you have added in the first process
 
+⚠️ No NS records needed at all.
 
+## Step 1: Create SSL Certificate (ACM)
 
-## STEP 2 — Create SSL Certificate (ACM)
+first create a ACM Certificate in aws console 
 
-In Amazon Certificate Manager:
-
-Request certificate:
-
-*.ehmutyam.xyz
+In Amazon Certificate Manager:--->Request certificate:  *.ehmutyam.xyz
 
 Choose: DNS validation
 
-It will give CNAME records → add them in GoDaddy
+It will give CNAME records 
+
+later add cname name  and cname value of a certificate in godaddy.com  as a DNS Records--> Add a New Record--> 
+
+choose Type: CNAME record  Name: CNAME Name  Value: CNAME Value    -->click on Save
+
+Go to Amazon Certificate Manager -->check Status is pending or ISSUED
 
 Wait until status: ISSUED
 
 
 
 
-## STEP 3 — Configure ALB Ingress (VERY IMPORTANT)
+## STEP 2 — Configure ALB Ingress (VERY IMPORTANT)
 
-Update your Kubernetes hostbased-ingress.yaml:
+Update your Kubernetes hostbased-ingress.yaml:  <ACM-ARN>  #replace with your certificate ARN
 
-metadata:
-  annotations:
-    kubernetes.io/ingress.class: alb
-    alb.ingress.kubernetes.io/certificate-arn: <ACM-ARN>  #replace with your certificate ARN
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
-    alb.ingress.kubernetes.io/ssl-redirect: '443'
-
-## STEP 4 — Host-based routing rules
-spec:
-  rules:
-  - host: cart.ehmutyam.xyz
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: cart-service
-            port:
-              number: 80
-
-  - host: product.ehmutyam.xyz
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: product-service
-            port:
-              number: 80
-
-  - host: payments.ehmutyam.xyz
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: payments-service
-            port:
-              number: 80
-
-Apply:
+### Apply:
 
  kubectl apply -f ns.yaml
  kubectl apply -f  hostbased-cart.yaml
@@ -664,15 +623,6 @@ type: CNAME Name: payments Data: alb DNS name
 Example:
 
 k8s-ecommerc-xxxxx.us-east-1.elb.amazonaws.com
-
-
-Fix DNS (KEEP GoDaddy, no NS)
-
-In GoDaddy:
-
-👉 DELETE ALL NS records if you have added in the first process
-
-⚠️ No NS records needed at all.
 
 
 ## STEP 5 — Test flow
