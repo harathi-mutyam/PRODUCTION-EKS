@@ -219,7 +219,7 @@ Because cluster is private:SSH into Baston server
 ssh -i ~/.ssh/ec2_keypair ubuntu@bastion-public-ip
 
 
-(example: ssh -i Downloads/ec2_keypair.pem ubuntu@<bastion public_ip>)
+(example: ssh -i Downloads/ec2_keypair.pem ubuntu@(bastion public_ip))
 
 **Configure Kubernetes access**
 
@@ -306,9 +306,9 @@ kubectl get ingress -n e-commerce
 
 **Test in browser:**
 
-http://<ALB-DNS>    -->payments
-http://<ALB-DNS>/cart   --->cart
-http://<ALB-DNS>/products   --->products
+http://(ALB-DNS)    -->payments
+http://(ALB-DNS)/cart   --->cart
+http://(ALB-DNS)/products   --->products
 
 
  14. **HTTPS Setup** (ACM + GoDaddy)  Enable TLS (HTTPS Setup)
