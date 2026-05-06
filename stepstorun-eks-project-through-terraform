@@ -195,7 +195,7 @@ Go to AWS Console → Route53
 
 Click Hosted Zones  -->  Click Create Hosted Zone --->
 Fill:
-Domain: ehmutyam.xyz
+Domain: ehmutyam.xyz   <Name must be your godaddy domain name>
 Type: Public Hosted Zone
 Click Create
 
@@ -251,7 +251,7 @@ alb.ingress.kubernetes.io/ssl-redirect: '443'
 
 make the above changes  and save the file
 
-kubectl apply -f ingress.yaml
+kubectl apply -f path-ingress.yaml
 
 kubectl get ingress -n e-commerce
 
@@ -259,18 +259,20 @@ NAME                 CLASS   HOSTS   ADDRESS                                    
 e-commerce-ingress   alb     *       k8s-ecommerc-ecommerc-949981ca5a-1099050560.us-east-1.elb.amazonaws.com   80      32s
 
 
-check it in browser  (doubt here)
+check it in browser
+https://<ALB-DNS>    -->payments
+https://<ALB-DNS>/cart   --->cart  (https://k8s-ecommerc-ecommerc-949981ca5a-1471282601.us-east-1.elb.amazonaws.com/cart/)
+https://<ALB-DNS>/products   --->products
 
 
 
+for debugging  purpose run the below commands optional
 
-for debugging  purpose run these commands
+# nslookup k8s-ecommerc-ecommerc-949981ca5a-1099050560.us-east-1.elb.amazonaws.com
 
-nslookup k8s-ecommerc-ecommerc-949981ca5a-1099050560.us-east-1.elb.amazonaws.com
+# kubectl get svc
 
-kubectl get svc
-
-
+Host based:
 
 create a new ingress.yaml file for host based  or make changes in path-ingress.yaml add host:cart.ehmutyam.xyz under rules: and remove path: /product and /cart
 
@@ -294,7 +296,7 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-  - host: cart.ehmutyam.xyz
+  - host: cart.ehmutyam.xyz    #host based pathing
     http:
       paths:
       - path: /
@@ -305,7 +307,7 @@ spec:
             port:
               number: 80
 
-  - host: product.ehmutyam.xyz
+  - host: product.ehmutyam.xyz   
     http:
       paths:
       - path: /
@@ -336,21 +338,16 @@ above content
 EOF
 
 
-# kubectl apply -f ingress.yaml
+kubectl get ingress  -n e-commerce
 
-optional 
-
-kubectl get ingress
 
 You will see:
 
 NAME                     HOSTS   ADDRESS
 e-commerce-ingress    cart.ehmuyam.xyz,..     abc123.us-east-1.elb.amazonaws.com
 
-kubectl get ingress
 
-
-kubectl delete ingress <ingress name>
+kubectl delete ingress <ingress name> -n e-commerce
 
 
  in cart.yaml file  change this line because you are using the nginx
